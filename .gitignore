@@ -12,9 +12,3 @@ pom.xml.asc
 .lein-failures
 .nrepl-port
 .cpcache/
-.idea/
-.DS_STORE
-.git
-.lsp/
-.clj-kondo/
-.vscode
