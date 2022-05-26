@@ -1,0 +1,73 @@
+name: "init-dependencies-action"
+description: "Perform common initialization steps for Metabase Starburst driver workflow"
+inputs:
+  should-run-check-name:
+    description: "Name of check if job should run"
+    required: false
+    default: ""
+  runs-by-default:
+    description: "Should job run by default?"
+    required: false
+    default: "true"
+  java-version:
+    description: "Java version to setup"
+    required: false
+    default: "11"
+  java-architecture:
+    description: "Java architecture to setup"
+    required: false
+    default: "x64"
+  node-version:
+    description: "Node version to setup"
+    required: false
+    default: "16.x"
+  clojure-version:
+    description: "Node version to setup"
+    required: false
+    default: "1.11.0.1100"
+
+env:
+  CLOJURE_VERSION: 1.11.0.1100
+
+outputs: 
+  run-job:
+    description: "Should job run?"
+    value: ${{ steps.job-should-run.outputs.run-job }}
+
+runs: 
+  using: composite
+  steps:
+    - name: "GHA Node Info"
+      shell: bash
+      run: |
+        echo " *** Runner info"
+        curl -SsL --retry 3 http://instance-data/latest/dynamic/instance-identity/document || true
+    - name: "Setup Java"  
+      uses: actions/setup-java@v2
+      if: steps.job-should-run.outputs.run-job && inputs.java_version != ''
+      with:
+        java-version: ${{ inputs.java-version }}
+        architecture: ${{ inputs.java-architecture }}
+        distribution: "zulu"
+    - name: "Use Node.js"
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Cache Clojure install
+      id: cache-clojure
+      uses: actions/cache@v3
+      with:
+        path: ~/bin/clojure
+        key: 1.11.0.1100
+
+    - name: Set up Clojure
+      if: steps.cache-clojure.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        curl -O https://download.clojure.org/install/linux-install-${{ inputs.clojure-version }}.sh
+        chmod +x linux-install-${{ inputs.clojure-version }}.sh
+        sudo ./linux-install-${{ inputs.clojure-version }}.sh --prefix ~/bin/clojure
+
+    - name: Add Clojure to path
+      shell: bash
+      run: echo "$HOME/bin/clojure/bin" >> $GITHUB_PATH
