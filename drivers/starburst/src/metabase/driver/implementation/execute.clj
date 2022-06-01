@@ -114,6 +114,16 @@
           instant (.toInstant t)]
       (.atOffset instant (t/zone-offset 0)))))
 
+(defmethod sql-jdbc.execute/read-column-thunk [:starburst Types/TIME_WITH_TIMEZONE]
+  [_ rs _ i]
+  ;; Converts TIME_WITH_TIMEZONE to local-time, then to OffsetTime with default time zone.
+  (fn []
+    (let [local-time (-> (.getTime rs i)
+                         sql-time->local-time)]
+      (t/offset-time
+       local-time
+       (t/zone-offset 0)))))
+
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                          SQL Statment Operations                                               |
 ;;; +----------------------------------------------------------------------------------------------------------------+
