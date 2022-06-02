@@ -1,4 +1,5 @@
-FROM trinodb/trino:382
+ARG version
+FROM trinodb/trino:$version
 
 # Obtain root privileges
 USER 0

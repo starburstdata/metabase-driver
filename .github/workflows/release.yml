@@ -1,0 +1,64 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Name of version  (ie 5.5.0)'
+        required: true
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Extract version info
+        uses: ./.github/actions/extract-version-info
+        id: extract-version-info
+      - name: Initialize dependencies
+        uses: ./.github/actions/init-dependencies
+        id: init-dependencies
+        with:
+          java-version: ${{ matrix.runners.java_version }}
+          java-architecture: ${{ matrix.runners.architecture }}
+          clojure-version: ${{ env.CLOJURE_VERSION }}
+      - name: Build
+        run: |
+          make build
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+      - name: Update Changelog
+        uses: thomaseizinger/keep-a-changelog-new-release@v1
+        with:
+          version: ${{ github.event.inputs.versionName }}
+      - name: Commit changelog and manifest files
+        id: make-commit
+        run: |
+          git add CHANGELOG.md
+          git commit --message "Prepare release ${{ github.event.inputs.versionName }}"
+          echo "::set-output name=commit::$(git rev-parse HEAD)"
+          git push
+      - name: Extract release notes
+        id: extract_release_notes
+        uses: ffurrer2/extract-release-notes@v1
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.versionName }}
+          release_name: ${{ github.event.inputs.versionName }}
+          body: ${{ format('{0}. Built with Trino:{1} and Clojure:{2}', steps.extract_release_notes.outputs.release_notes , env.TRINO_VERSION , env.CLOJURE_VERSION )}}
+          draft: false
+          prerelease: false
+      - name: Upload jar
+        run: mv ./metabase/resources/modules/starburst.metabase-driver.jar ./starburst-${{ github.event.inputs.versionName }}.metabase-driver.jar && gh release upload ${{ github.event.inputs.versionName }} ./starburst-${{ github.event.inputs.versionName }}.metabase-driver.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

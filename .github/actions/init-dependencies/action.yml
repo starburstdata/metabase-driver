@@ -22,12 +22,8 @@ inputs:
     required: false
     default: "16.x"
   clojure-version:
-    description: "Node version to setup"
-    required: false
-    default: "1.11.0.1100"
-
-env:
-  CLOJURE_VERSION: 1.11.0.1100
+    description: "Clojure version to setup"
+    required: true
 
 outputs: 
   run-job:
@@ -58,7 +54,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: ~/bin/clojure
-        key: 1.11.0.1100
+        key: ${{ inputs.clojure-version }}-key
 
     - name: Set up Clojure
       if: steps.cache-clojure.outputs.cache-hit != 'true'

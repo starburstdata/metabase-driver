@@ -1,6 +1,8 @@
 .PHONY: clone_metabase_if_missing clean copy_to_metabase front_end driver server test all release
 .DEFAULT_GOAL := all
-export MB_EDITION=ee 
+export MB_EDITION=ee
+
+trino_version := $(shell jq '.trino' app_versions.json)
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 is_trino_started := $(shell curl --fail --silent --insecure http://localhost:8080/v1/info | jq '.starting')
@@ -14,8 +16,8 @@ endif
 
 start_trino_if_missing:
 ifeq ($(is_trino_started),)
-	@echo "Trino not started, starting...";
-	cd $(makefile_dir)/resources/docker/trino; docker build -t trino-metabase-test .; docker run --rm -d  -p 8080:8080/tcp trino-metabase-test:latest
+	@echo "Trino not started, starting using version $(trino_version)...";
+	cd $(makefile_dir)/resources/docker/trino; docker build -t trino-metabase-test . --build-arg version=$(trino_version); docker run --rm -d  -p 8080:8080/tcp trino-metabase-test:latest
 else
 	@echo "Trino started, skipping initialization."
 endif

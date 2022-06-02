@@ -1,0 +1,19 @@
+name: "extract-version-info-action"
+description: "Extracts version info from app_versions.json"
+runs: 
+  using: composite
+  steps:
+    - name: Extract version info
+      shell: bash
+      run: |
+        clojureVersion=`jq '.clojure' app_versions.json `
+        trinoVersion=`jq '.trino' app_versions.json `
+        echo "TRINO_VERSION=$trinoVersion" >> $GITHUB_ENV
+        echo "CLOJURE_VERSION=$clojureVersion" >> $GITHUB_ENV 
+        echo "::set-env $clojureVersion"
+        echo "::set-env $trinoVersion"
+
+outputs: 
+  clojureVersion:
+    description: "clojure version"
+    value: ${{ steps.job-should-run.outputs.run-job }}
