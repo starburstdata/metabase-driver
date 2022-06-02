@@ -39,15 +39,19 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Extract version info
+        uses: ./.github/actions/extract-version-info
+        id: extract-version-info
       - name: Initialize dependencies
         uses: ./.github/actions/init-dependencies
         id: init-dependencies
         with:
           java-version: ${{ matrix.runners.java_version }}
           java-architecture: ${{ matrix.runners.architecture }}
+          clojure-version: ${{ env.CLOJURE_VERSION }}
       - name: Build
         run: |
-          git show && ls -lar ./metabase/ && make build
+          make build
       - name: Test
         run: |
           make test

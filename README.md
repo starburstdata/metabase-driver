@@ -21,6 +21,12 @@ This command starts a local Metabase server on port `3000`. If you want to build
 ## Testing Driver
 Once you have built all required resources with the `make build` command, run `make test`. This command builds your local driver changes and then starts Starburst driver tests.
 
+## Releasing Driver
+To create a release from the `main` branch, head to actions and create a new release workflow. 
+Enter in the correct semantic version, and submit the release. This will create a new tag and 
+release with the provided version, as well as promote the CHANGELOG.md and upload the `.jar` 
+binary for clients to consume.
+
 ## References
 * [Developer's Guide](https://www.metabase.com/docs/latest/developers-guide/start.html)
 * [Developer's Environment Guide](https://www.metabase.com/docs/latest/developers-guide/devenv.html)
