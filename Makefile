@@ -3,12 +3,21 @@
 export MB_EDITION=ee 
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+is_trino_started := $(shell curl --fail --silent --insecure http://localhost:8080/v1/info | jq '.starting')
 
 clone_metabase_if_missing:
 ifneq ($(wildcard $(makefile_dir)/metabase/.*),)
 	@echo "Did not find metabase, initializing..."; git submodule update --init --remote
 else
 	@echo "Found metabase, skipping initialization."
+endif
+
+start_trino_if_missing:
+ifeq ($(is_trino_started),)
+	@echo "Trino not started, starting...";
+	cd $(makefile_dir)/resources/docker/trino; docker build -t trino-metabase-test .; docker run --rm -d  -p 8080:8080/tcp trino-metabase-test:latest
+else
+	@echo "Trino started, skipping initialization."
 endif
 
 clean:
@@ -31,10 +40,8 @@ server:
 	@echo "Starting metabase..."
 	cd $(makefile_dir)/metabase/; clojure -M:run
 
-test:
+test: start_trino_if_missing copy_to_metabase
 	@echo "Testing tarburst driver..."
 	cd $(makefile_dir)/metabase/; DRIVERS=starburst clojure -X:dev:drivers:drivers-dev:test
 
-all: clone_metabase_if_missing copy_to_metabase front_end driver
-
-release: all test
+build: clone_metabase_if_missing copy_to_metabase front_end driver

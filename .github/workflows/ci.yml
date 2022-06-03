@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+  pull_request:
+  workflow_dispatch: # Allows to trigger workflow manually or via API
+
+env:
+  # Build enterprise edition
+  MB_EDITION: ee
+
+# Cancel previous PR builds.
+concurrency:
+  # Cancel all workflow runs except latest within a concurrency group. This is achieved by defining a concurrency group for the PR.
+  # Non-PR builds have singleton concurrency groups.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build-success:
+    # This job is executed only if any dependency fails to mark entire workflow execution as failure.
+    # Otherwise it is skipped which is treated as success of the entire workflow execution.
+    if: ${{ !success() }}
+    runs-on: [ubuntu-20.04]
+    needs: [release]
+    steps:
+      - run: false
+
+  release:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Initialize dependencies
+        uses: ./.github/actions/init-dependencies
+        id: init-dependencies
+        with:
+          java-version: ${{ matrix.runners.java_version }}
+          java-architecture: ${{ matrix.runners.architecture }}
+      - name: Build
+        run: |
+          git show && ls -lar ./metabase/ && make build
+      - name: Test
+        run: |
+          make test
+
