@@ -1,0 +1,58 @@
+name: Create Release Branch
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Name of version  (ie 5.5.0)'
+        required: true
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Extract version info
+        uses: ./.github/actions/extract-version-info
+        id: extract-version-info
+      - name: Initialize dependencies
+        uses: ./.github/actions/init-dependencies
+        id: init-dependencies
+        with:
+          java-version: ${{ matrix.runners.java_version }}
+          java-architecture: ${{ matrix.runners.architecture }}
+          clojure-version: ${{ env.CLOJURE_VERSION }}
+      - name: Create release branch
+        run: git checkout -b release/${{ github.event.inputs.versionName }}
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+      - name: Update Changelog
+        uses: thomaseizinger/keep-a-changelog-new-release@v1
+        with:
+          version: ${{ github.event.inputs.versionName }}
+      - name: Commit changelog and manifest files
+        id: make-commit
+        run: |
+          git add CHANGELOG.md
+          git commit --message "Prepare release ${{ github.event.inputs.versionName }}"
+          echo "::set-output name=commit::$(git rev-parse HEAD)"
+      - name: Push new branch
+        run: git push --set-upstream origin release/${{ github.event.inputs.versionName }}
+      - name: Create pull request into main
+        uses: thomaseizinger/create-pull-request@1.0.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: release/${{ github.event.inputs.versionName }}
+          base: main
+          title: ${{ github.event.inputs.versionName }} into main
+          reviewers: ${{ github.event.issue.user.login }}
+          body: |
+              This PR was created in response to a create release-branch workflow.
+              I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.
+              Note: Once this PR is merged, use the Release workflow to create a tagged release. See: 
+              https://github.com/starburstdata/metabase-driver/actions/workflows/release.yml
