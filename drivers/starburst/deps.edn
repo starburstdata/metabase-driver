@@ -15,7 +15,7 @@
  ["src" "resources"]
 
  :deps
- {io.trino/trino-jdbc {:mvn/version "380"}}
+ {io.trino/trino-jdbc {:mvn/version "384"}}
 
  ;; build the driver with clojure -X:build
  :aliases
