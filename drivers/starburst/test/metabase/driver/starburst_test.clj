@@ -223,3 +223,13 @@
                   "&KerberosRemoteServiceName=HTTP&KerberosKeytabPath=/path/to/client.keytab"
                   "&KerberosConfigPath=/path/to/krb5.conf&KerberosDelegation=true")
              (:subname jdbc-spec))))))
+
+(deftest source-property-test
+  (testing "source property is set correctly"
+    (let [details {:host                         "starburst-server"
+                   :port                         7778
+                   :catalog                      "my-catalog"
+                   :ssl                          true}
+          jdbc-spec (sql-jdbc.conn/connection-details->spec :starburst details)]
+      (is (= (str "Starburst Metabase")
+       (:source jdbc-spec))))))

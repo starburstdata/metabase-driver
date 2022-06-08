@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Overrides JDBC source info
+
 ## [1.0.1] - 2022-06-07
 
 -   Updates release workflows in github
