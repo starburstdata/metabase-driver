@@ -30,10 +30,15 @@ Enter in the correct semantic version, and submit the release. This will create 
 release with the provided version, as well as promote the CHANGELOG.md and upload the `.jar` 
 binary for clients to consume.
 
-### References
+## References
 * [Developer's Guide](https://www.metabase.com/docs/latest/developers-guide/start.html)
 * [Developer's Environment Guide](https://www.metabase.com/docs/latest/developers-guide/devenv.html)
 * [Driver Developer's Guide](https://www.metabase.com/docs/latest/developers-guide-drivers.html#driver-development)
 * [Driver Development Announcements](https://www.metabase.com/docs/latest/developers-guide-drivers.html#driver-development-announcements)
 * [Driver Development Form](https://discourse.metabase.com/c/driver-development)
 * [Metabase](https://www.metabase.com/)
+
+## Contact
+For feature requests and bugs, please create an issue in this repo. For further support, see the following resources:
+* [Trino Slack](https://trino.io/slack.html)
+* [Starburst Support](https://docs.starburst.io/support.html)
