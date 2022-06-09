@@ -231,5 +231,4 @@
                    :catalog                      "my-catalog"
                    :ssl                          true}
           jdbc-spec (sql-jdbc.conn/connection-details->spec :starburst details)]
-      (is (= (str "Starburst Metabase")
-       (:source jdbc-spec))))))
+      (is (true? (str/starts-with? (:source jdbc-spec) "Starburst Metabase"))))))
