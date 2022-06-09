@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.0.3] - 2022-06-09
+
 -   Adds contact info
 
 ## [1.0.2] - 2022-06-08
@@ -16,7 +18,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.2...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.3...HEAD
+
+[1.0.3]: https://github.com/starburstdata/metabase-driver/compare/1.0.2...1.0.3
 
 [1.0.2]: https://github.com/starburstdata/metabase-driver/compare/1.0.1...1.0.2
 
