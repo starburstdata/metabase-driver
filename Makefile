@@ -26,9 +26,9 @@ clean:
 	@echo "Force cloning Metabase repo..."
 	git submodule update --init --recursive --force --remote
 
-copy_to_metabase:
-	@echo "Copying to metabase..."
-	cp -R $(makefile_dir)/drivers/starburst $(makefile_dir)/metabase/modules/drivers
+link_to_driver:
+	@echo "Adding link to driver..."
+	ln -s ../../../drivers/starburst $(makefile_dir)/metabase/modules/drivers
 
 front_end:
 	@echo "Building Front End..."
@@ -42,8 +42,8 @@ server:
 	@echo "Starting metabase..."
 	cd $(makefile_dir)/metabase/; clojure -M:run
 
-test: start_trino_if_missing copy_to_metabase
+test: start_trino_if_missing link_to_driver
 	@echo "Testing tarburst driver..."
 	cd $(makefile_dir)/metabase/; DRIVERS=starburst clojure -X:dev:drivers:drivers-dev:test
 
-build: clone_metabase_if_missing copy_to_metabase front_end driver
+build: clone_metabase_if_missing link_to_driver front_end driver
