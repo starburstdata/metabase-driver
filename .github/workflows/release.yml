@@ -47,7 +47,7 @@ jobs:
           draft: false
           prerelease: false
       - name: Upload jar
-        run: mv ./metabase/resources/modules/starburst.metabase-driver.jar ./starburst-${{ github.event.inputs.versionName }}.metabase-driver.jar && gh release upload ${{ github.event.inputs.versionName }} ./starburst-${{ github.event.inputs.versionName }}.metabase-driver.jar
+        run: mv ./metabase/resources/modules/starburst.metabase-driver.jar ./starburst.metabase-driver-${{ github.event.inputs.versionName }}.jar && gh release upload ${{ github.event.inputs.versionName }} ./starburst-${{ github.event.inputs.versionName }}.metabase-driver.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
