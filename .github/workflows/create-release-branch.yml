@@ -35,6 +35,8 @@ jobs:
         uses: thomaseizinger/keep-a-changelog-new-release@v1
         with:
           version: ${{ github.event.inputs.versionName }}
+      - name: Update Metabase Tag version
+        run: make checkout_latest_metabase_tag 
       - name: Commit changelog and manifest files
         id: make-commit
         run: |
@@ -54,6 +56,6 @@ jobs:
           body: |
               This PR was created in response to a create release-branch workflow.
               I've updated the version name and code commit: ${{ steps.make-commit.outputs.commit }}.
-              Please review this PR. You should expect to see CHANGELOG promotions.
+              Please review this PR. You should expect to see CHANGELOG and version promotions. 
               Once this PR is merged, use the Release workflow to create a tagged release. See: 
               https://github.com/starburstdata/metabase-driver/actions/workflows/release.yml

@@ -43,7 +43,7 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.versionName }}
           release_name: ${{ github.event.inputs.versionName }}
-          body: ${{ format('{0}. Built with Trino:{1} and Clojure:{2}', steps.extract_release_notes.outputs.release_notes , env.TRINO_VERSION , env.CLOJURE_VERSION )}}
+          body: ${{ format('{0}. Built with versions Trino:{1} Clojure:{2} Metabase:{3}', steps.extract_release_notes.outputs.release_notes , env.TRINO_VERSION , env.CLOJURE_VERSION , env.METABASE_VERSION )}}
           draft: false
           prerelease: false
       - name: Upload jar

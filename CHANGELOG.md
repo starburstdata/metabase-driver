@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Updates to MAKEFILE to support mainline metabase
+
 ## [1.0.3] - 2022-06-09
 
 -   Adds contact info
