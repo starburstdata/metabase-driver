@@ -27,8 +27,10 @@ Once you have built all required resources with the `make build` command, run `m
 ### Releasing Driver
 To create a release from the `main` branch, head to actions and create a new release workflow. 
 Enter in the correct semantic version, and submit the release. This will create a new tag and 
-release with the provided version, as well as promote the CHANGELOG.md and upload the `.jar` 
-binary for clients to consume.
+release with the provided version, as well as promote the CHANGELOG.md, update the metabase version, and upload the `.jar` binary for clients to consume.
+
+### Update Metabase Version
+If needed, `make checkout_latest_metabase_tag` will update Metabase to its latest tagged release. 
 
 ## References
 * [Developer's Guide](https://www.metabase.com/docs/latest/developers-guide/start.html)

@@ -8,10 +8,13 @@ runs:
       run: |
         clojureVersion=`jq '.clojure' app_versions.json `
         trinoVersion=`jq '.trino' app_versions.json `
+        metabaseVersion=`jq '.metabase' app_versions.json `
         echo "TRINO_VERSION=$trinoVersion" >> $GITHUB_ENV
-        echo "CLOJURE_VERSION=$clojureVersion" >> $GITHUB_ENV 
+        echo "CLOJURE_VERSION=$clojureVersion" >> $GITHUB_ENV
+        echo "METABASE_VERSION=$metabaseVersion" >> $GITHUB_ENV  
         echo "::set-env $clojureVersion"
         echo "::set-env $trinoVersion"
+        echo "::set-env $metabaseVersion"
 
 outputs: 
   clojureVersion:

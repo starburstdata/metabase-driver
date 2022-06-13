@@ -1,6 +1,4 @@
 [submodule "metabase"]
 	path = metabase
-	# Replace with master when ready
-	url = https://github.com/starburstdata/metabase.git
-	branch = dibiasio/starburst-driver-unified
-
+	url = https://github.com/metabase/metabase.git
+	branch = master
