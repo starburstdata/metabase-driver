@@ -1,4 +1,4 @@
-.PHONY: clone_metabase_if_missing clean copy_to_metabase front_end driver server test all release
+.PHONY: clone_metabase_if_missing clean link_to_driver front_end driver update_deps_files server test all release
 .DEFAULT_GOAL := all
 export MB_EDITION=ee
 
@@ -33,9 +33,9 @@ clean:
 	@echo "Force cleaning Metabase repo..."
 	cd $(makefile_dir)/metabase/modules/drivers && git reset --hard
 
-copy_to_metabase:
-	@echo "Copying to metabase..."
-	cp -R $(makefile_dir)/drivers/starburst $(makefile_dir)/metabase/modules/drivers
+link_to_driver:
+	@echo "Adding link to driver..."
+	ln -sf ../../../drivers/starburst $(makefile_dir)/metabase/modules/drivers
 
 front_end:
 	@echo "Building Front End..."
@@ -50,7 +50,7 @@ server:
 	cd $(makefile_dir)/metabase/; clojure -M:run
 
 # This command adds the require starburst driver dependencies to the metabase repo.
-update_deps_files:	
+update_deps_files:
 	@if cd $(makefile_dir)/metabase && grep -q starburst deps.edn; \
 		then \
 			echo "Metabase deps file updated, skipping..."; \
@@ -67,8 +67,8 @@ update_deps_files:
 			cd $(makefile_dir)/metabase/modules/drivers/; sed -i.bak "s/\}\}\}/\} \metabase\/starburst \{:local\/root \"starburst\"\}\}\}/g" deps.edn; \
 	fi
 
-test: start_trino_if_missing copy_to_metabase update_deps_files
+test: start_trino_if_missing link_to_driver update_deps_files
 	@echo "Testing tarburst driver..."
 	cd $(makefile_dir)/metabase/; DRIVERS=starburst clojure -X:dev:drivers:drivers-dev:test
 
-build: clone_metabase_if_missing update_deps_files copy_to_metabase front_end driver
+build: clone_metabase_if_missing update_deps_files link_to_driver front_end driver
