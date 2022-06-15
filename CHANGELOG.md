@@ -1,6 +1,8 @@
 ## [Unreleased]
 
 - Updates to MAKEFILE to support mainline metabase
+- Remove Gitmodules dir
+- Upgrade to `"metabase": "v1.43.3"`
 
 ## [1.0.3] - 2022-06-09
 

@@ -9,14 +9,15 @@ makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 is_trino_started := $(shell curl --fail --silent --insecure http://localhost:8080/v1/info | jq '.starting')
 
 clone_metabase_if_missing:
-ifneq ($(wildcard $(makefile_dir)/metabase/.*),)
-	@echo "Did not find metabase, initializing..."; git submodule update --init --remote
+ifeq ($(wildcard $(makefile_dir)/metabase/.),)
+	@echo "Did not find metabase repo, cloning version $(metabase_version)..."; git clone -b $(metabase_version) --single-branch https://github.com/metabase/metabase.git
 else
-	@echo "Found metabase, skipping initialization."
+	@echo "Found metabase repo, skipping initialization."
 endif
 
 checkout_latest_metabase_tag: clone_metabase_if_missing clean
-	$(eval latest_metabase_version=$(shell cd $(makefile_dir)/metabase/modules/drivers && git tag | egrep 'v[0-9]+\.[0-9]+\.[0-9]+' | sort | tail -n 1))
+	cd $(makefile_dir)/metabase; git fetch --all --tags;
+	$(eval latest_metabase_version=$(shell cd $(makefile_dir)/metabase; git tag | egrep 'v[0-9]+\.[0-9]+\.[0-9]+' | sort | tail -n 1))
 	@echo "Checking out latest metabase tag: $(latest_metabase_version)"
 	cd $(makefile_dir)/metabase/modules/drivers && git checkout $(latest_metabase_version);
 	sed -i '' 's/metabase\": \".*\"/metabase\": \"$(latest_metabase_version)\"/g' app_versions.json;
@@ -34,8 +35,12 @@ clean:
 	cd $(makefile_dir)/metabase/modules/drivers && git reset --hard
 
 link_to_driver:
-	@echo "Adding link to driver..."
-	ln -sf ../../../drivers/starburst $(makefile_dir)/metabase/modules/drivers
+ifeq ($(wildcard $(makefile_dir)/metabase/modules/drivers/starburst/.),)
+	@echo "Adding link to driver..."; ln -s ../../../drivers/starburst $(makefile_dir)/metabase/modules/drivers
+else
+	@echo "Driver found, skipping linking."
+endif
+	
 
 front_end:
 	@echo "Building Front End..."
@@ -68,7 +73,7 @@ update_deps_files:
 	fi
 
 test: start_trino_if_missing link_to_driver update_deps_files
-	@echo "Testing tarburst driver..."
+	@echo "Testing Starburst driver..."
 	cd $(makefile_dir)/metabase/; DRIVERS=starburst clojure -X:dev:drivers:drivers-dev:test
 
 build: clone_metabase_if_missing update_deps_files link_to_driver front_end driver
