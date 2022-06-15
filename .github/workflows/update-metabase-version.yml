@@ -1,0 +1,52 @@
+name: Create Metabase Version Update Branch
+on:
+  workflow_dispatch:
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    timeout-minutes: 30
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Extract version info
+        uses: ./.github/actions/extract-version-info
+        id: extract-version-info
+      - name: Initialize dependencies
+        uses: ./.github/actions/init-dependencies
+        id: init-dependencies
+        with:
+          java-version: ${{ matrix.runners.java_version }}
+          java-architecture: ${{ matrix.runners.architecture }}
+          clojure-version: ${{ env.CLOJURE_VERSION }}
+      - name: Create release branch
+        run: git checkout -b version-update/${{ env.METABASE_VERSION }}
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+      - name: Update Metabase Tag version
+        run: make checkout_latest_metabase_tag
+      - name: Extract version info
+        uses: ./.github/actions/extract-version-info
+        id: extract-updated-version-info
+      - name: Commit App Versions
+        id: make-commit
+        run: |
+          git add app_versions.json
+          git commit --message "Updates metabase version to ${{ env.METABASE_VERSION }}"
+          echo "::set-output name=commit::$(git rev-parse HEAD)"
+      - name: Push new branch
+        run: git push --set-upstream origin version-update/${{ env.METABASE_VERSION }}
+      - name: Create pull request into main
+        uses: thomaseizinger/create-pull-request@1.0.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          head: version-update-${{ env.METABASE_VERSION }}
+          base: main
+          title: Update Metabase to version ${{ env.METABASE_VERSION }}
+          reviewers: ${{ github.event.issue.user.login }}
+          body: |
+              This PR was created in response to a create Metabase Version Update Branch workflow.
+              I've updated the metabase version.
