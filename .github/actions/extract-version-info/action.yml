@@ -6,9 +6,9 @@ runs:
     - name: Extract version info
       shell: bash
       run: |
-        clojureVersion=`jq '.clojure' app_versions.json `
-        trinoVersion=`jq '.trino' app_versions.json `
-        metabaseVersion=`jq '.metabase' app_versions.json `
+        clojureVersion=`jq -r '.clojure' app_versions.json `
+        trinoVersion=`jq -r '.trino' app_versions.json `
+        metabaseVersion=`jq -r '.metabase' app_versions.json `
         echo "TRINO_VERSION=$trinoVersion" >> $GITHUB_ENV
         echo "CLOJURE_VERSION=$clojureVersion" >> $GITHUB_ENV
         echo "METABASE_VERSION=$metabaseVersion" >> $GITHUB_ENV  
