@@ -20,8 +20,6 @@ jobs:
           java-version: ${{ matrix.runners.java_version }}
           java-architecture: ${{ matrix.runners.architecture }}
           clojure-version: ${{ env.CLOJURE_VERSION }}
-      - name: Create release branch
-        run: git checkout -b version-update/${{ env.METABASE_VERSION }}
       - name: Initialize mandatory git config
         run: |
           git config user.name "GitHub Actions"
@@ -31,6 +29,8 @@ jobs:
       - name: Extract version info
         uses: ./.github/actions/extract-version-info
         id: extract-updated-version-info
+      - name: Create release branch
+        run: git checkout -b version-update/${{ env.METABASE_VERSION }}
       - name: Commit App Versions
         id: make-commit
         run: |
