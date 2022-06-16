@@ -20,7 +20,7 @@ checkout_latest_metabase_tag: clone_metabase_if_missing clean
 	$(eval latest_metabase_version=$(shell cd $(makefile_dir)/metabase; git tag | egrep 'v[0-9]+\.[0-9]+\.[0-9]+' | sort | tail -n 1))
 	@echo "Checking out latest metabase tag: $(latest_metabase_version)"
 	cd $(makefile_dir)/metabase/modules/drivers && git checkout $(latest_metabase_version);
-	sed -i '' 's/metabase\": \".*\"/metabase\": \"$(latest_metabase_version)\"/g' app_versions.json;
+	sed -i.bak 's/metabase\": \".*\"/metabase\": \"$(latest_metabase_version)\"/g' app_versions.json; rm  ./app_versions.json.bak
 
 start_trino_if_missing:
 ifeq ($(is_trino_started),)
