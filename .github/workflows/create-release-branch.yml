@@ -6,7 +6,7 @@ on:
         description: 'Name of version  (ie 5.5.0)'
         required: true
 jobs:
-  create-release:
+  create-release-branch:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

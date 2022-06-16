@@ -2,7 +2,7 @@ name: Create Metabase Version Update Branch
 on:
   workflow_dispatch:
 jobs:
-  create-release:
+  update-metabase-version:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -43,7 +43,7 @@ jobs:
         uses: thomaseizinger/create-pull-request@1.0.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          head: version-update-${{ env.METABASE_VERSION }}
+          head: version-update/${{ env.METABASE_VERSION }}
           base: main
           title: Update Metabase to version ${{ env.METABASE_VERSION }}
           reviewers: ${{ github.event.issue.user.login }}
