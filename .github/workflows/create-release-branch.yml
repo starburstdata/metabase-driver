@@ -41,7 +41,7 @@ jobs:
           sed -i.bak 's/version:.*/version: ${{ github.event.inputs.versionName }}/g' drivers/starburst/resources/metabase-plugin.yaml; rm ./drivers/starburst/resources/metabase-plugin.yaml.bak
           sed -i.bak 's/\"Starburst Metabase .*\"/\"Starburst Metabase ${{ github.event.inputs.versionName }}\"/g' drivers/starburst/src/metabase/driver/implementation/connectivity.clj; rm ./drivers/starburst/src/metabase/driver/implementation/connectivity.clj.bak
           git add drivers/starburst/resources/metabase-plugin.yaml
-          git add drivers/starburst/src/metabase/driver/implementation/connectivity.clj
+          git add -f drivers/starburst/src/metabase/driver/implementation/connectivity.clj
       - name: Commit changelog and manifest files
         id: make-commit
         run: |
