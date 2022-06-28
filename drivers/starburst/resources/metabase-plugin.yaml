@@ -20,7 +20,7 @@ driver:
         - name: catalog
           placeholder: tpch
           display-name: Catalog
-          required: false
+          required: true
     - name: schema
       display-name: Schema (optional)
       required: false
