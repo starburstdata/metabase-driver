@@ -1,8 +1,10 @@
 ## [Unreleased]
 
-- Updates to MAKEFILE to support mainline metabase
-- Remove Gitmodules dir
-- fix null pointer issues releated to TIMESTAMP WTZ, TIME, and TIME WTZ
+## [1.0.4] - 2022-06-29
+
+-   Updates to MAKEFILE to support mainline metabase
+-   Remove Gitmodules dir
+-   fix null pointer issues releated to TIMESTAMP WTZ, TIME, and TIME WTZ
 
 ## [1.0.3] - 2022-06-09
 
@@ -22,7 +24,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.3...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.4...HEAD
+
+[1.0.4]: https://github.com/starburstdata/metabase-driver/compare/1.0.3...1.0.4
 
 [1.0.3]: https://github.com/starburstdata/metabase-driver/compare/1.0.2...1.0.3
 
