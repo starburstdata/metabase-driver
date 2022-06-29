@@ -2,7 +2,7 @@
 
 - Updates to MAKEFILE to support mainline metabase
 - Remove Gitmodules dir
-- Upgrade to `"metabase": "v1.43.3"`
+- fix null pointer issues releated to TIMESTAMP WTZ, TIME, and TIME WTZ
 
 ## [1.0.3] - 2022-06-09
 
