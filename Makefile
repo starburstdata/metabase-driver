@@ -35,7 +35,7 @@ clean:
 	cd $(makefile_dir)/metabase/modules/drivers && git reset --hard
 
 link_to_driver:
-ifeq ($(wildcard $(makefile_dir)/metabase/modules/drivers/starburst/.),)
+ifeq ($(wildcard $(makefile_dir)/metabase/modules/drivers/starburst/src),)
 	@echo "Adding link to driver..."; ln -s ../../../drivers/starburst $(makefile_dir)/metabase/modules/drivers
 else
 	@echo "Driver found, skipping linking."
