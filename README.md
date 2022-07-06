@@ -33,6 +33,7 @@ release with the provided version, as well as promote the CHANGELOG.md, update t
 If needed, `make checkout_latest_metabase_tag` will update Metabase to its latest tagged release. 
 
 ## References
+* [Encrypting Metabase Database Details](https://www.metabase.com/docs/latest/operations-guide/encrypting-database-details-at-rest.html)
 * [Developer's Guide](https://www.metabase.com/docs/latest/developers-guide/start.html)
 * [Developer's Environment Guide](https://www.metabase.com/docs/latest/developers-guide/devenv.html)
 * [Driver Developer's Guide](https://www.metabase.com/docs/latest/developers-guide-drivers.html#driver-development)
@@ -43,4 +44,3 @@ If needed, `make checkout_latest_metabase_tag` will update Metabase to its lates
 ## Contact
 For feature requests and bugs, please create an issue in this repo. For further support, see the following resources:
 * [Trino Slack](https://trino.io/slack.html)
-* [Starburst Support](https://docs.starburst.io/support.html)
