@@ -5,9 +5,18 @@ The Starburst Driver `.jar` binary can be downloaded from our releases in github
 it must be stored in the `plugins` directory within the Metabase working dir. See: https://www.metabase.com/docs/latest/developers-guide-drivers.html#how-to-use-a-third-party-driver
 
 ## Developers Guide Drivers
+
 Our build scripts will git clone the Metabase repo to `./metabase` and copy all Starburst driver files into the 
 expected folder: `./metabase/modules/drivers/starburst`. From here, we leverage the Metabase build scripts to 
 build our `.jar` file into the correct dir, run tests, and start the local server.
+
+### Dependencies
+
+* [Docker](https://www.docker.com/)
+* [Clojure](https://clojure.org/guides/install_clojure)
+
+##### Quick Start
+Run `make build test` to build and run tests locally. If everything passes, you're good to go!
 
 ### Building
 Run `make build` to clone the Metabase repo and build all required components. This command should not need
