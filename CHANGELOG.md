@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+-   Add default-advanced-options
+-   Update README.md
+
 ## [1.0.4] - 2022-06-29
 
 -   Updates to MAKEFILE to support mainline metabase
