@@ -34,6 +34,8 @@ driver:
     - merge:
         - additional-options
         - placeholder: "trustServerCertificate=false"
+    - advanced-options-start
+    - default-advanced-options
 
 init:
   - step: load-namespace
