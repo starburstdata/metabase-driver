@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.0.5] - 2022-07-11
+
 -   Add default-advanced-options
 -   Update README.md
 
@@ -27,7 +29,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.4...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.5...HEAD
+
+[1.0.5]: https://github.com/starburstdata/metabase-driver/compare/1.0.4...1.0.5
 
 [1.0.4]: https://github.com/starburstdata/metabase-driver/compare/1.0.3...1.0.4
 
