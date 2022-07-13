@@ -34,9 +34,13 @@ This command starts a local Metabase server on port `3000`. If you want to build
 Once you have built all required resources with the `make build` command, run `make test`. This command builds your local driver changes and then starts Starburst driver tests.
 
 ### Releasing Driver
-To create a release from the `main` branch, head to actions and create a new release workflow. 
-Enter in the correct semantic version, and submit the release. This will create a new tag and 
-release with the provided version, as well as promote the CHANGELOG.md, update the metabase version, and upload the `.jar` binary for clients to consume.
+To create a release from the `main` branch follow the below steps.
+
+#### 1.) Create a Release Branch
+Head to actions and run the `Create Release Branch` workflow entering in the correct semantic version, and submit the workflow. This will create a new PR that contains promoted CHANGELOG.md and updated version info. Review the PR and merge once checks pass.
+
+#### 2.) Create the Release Artifact 
+Head to actions and run the `Release` workflow entering the same the same semantic version, and submit the release workflow. When this workflow completes, it will create a new tagged github release with the provided version and upload the `.jar` binary for clients to consume.
 
 ### Update Metabase Version
 If needed, `make checkout_latest_metabase_tag` will update Metabase to its latest tagged release. 
