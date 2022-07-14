@@ -33,10 +33,10 @@ driver:
         - password
         - required: false
     - ssl
+    - advanced-options-start
     - merge:
         - additional-options
         - placeholder: "trustServerCertificate=false"
-    - advanced-options-start
     - default-advanced-options
 
 init:
