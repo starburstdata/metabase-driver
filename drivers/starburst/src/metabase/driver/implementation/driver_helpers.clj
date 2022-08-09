@@ -28,5 +28,5 @@
                               :native-parameters               true
                               :expression-aggregations         true
                               :binning                         true
-                              :foreign-keys                    true}]
+                              :foreign-keys                    false}]
   (defmethod driver/supports? [:starburst feature] [_ _] supported?))
