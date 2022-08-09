@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+- Bump Metabase version to v1.44.0
+- Disable Foreign Key feature
+
 ## [1.0.5] - 2022-07-11
 
 -   Add default-advanced-options

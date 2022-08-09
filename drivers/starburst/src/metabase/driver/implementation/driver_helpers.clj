@@ -21,6 +21,11 @@
   [_]
   :monday)
 
+(defmethod driver/describe-table-fks :starburst [_ _ _]
+  ;; Trino does not support finding foreign key metadata tables, but some connectors support foreign keys.
+  ;; We have this return nil to avoid running unnecessary queries during fks sync.
+  nil)
+
 (doseq [[feature supported?] {:set-timezone                    true
                               :basic-aggregations              true
                               :standard-deviation-aggregations true
@@ -28,5 +33,5 @@
                               :native-parameters               true
                               :expression-aggregations         true
                               :binning                         true
-                              :foreign-keys                    false}]
+                              :foreign-keys                    true}]
   (defmethod driver/supports? [:starburst feature] [_ _] supported?))
