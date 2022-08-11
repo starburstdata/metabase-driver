@@ -1,7 +1,9 @@
 ## [Unreleased]
 
-- Bump Metabase version to v1.44.0
-- Disable Foreign Key feature
+## [1.0.6-RC-1] - 2022-08-11
+
+-   Bump Metabase version to v1.44.0
+-   Disable Foreign Key feature
 
 ## [1.0.5] - 2022-07-11
 
@@ -32,7 +34,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.5...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.6-RC-1...HEAD
+
+[1.0.6-RC-1]: https://github.com/starburstdata/metabase-driver/compare/1.0.5...1.0.6-RC-1
 
 [1.0.5]: https://github.com/starburstdata/metabase-driver/compare/1.0.4...1.0.5
 
