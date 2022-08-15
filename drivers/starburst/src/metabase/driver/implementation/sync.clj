@@ -22,6 +22,7 @@
             [metabase.driver.sql-jdbc.connection :as sql-jdbc.conn]
             [metabase.driver.sql-jdbc.sync :as sql-jdbc.sync]
             [metabase.driver.sql-jdbc.sync.describe-database :as sql-jdbc.describe-database]
+            [metabase.driver.sql-jdbc.execute :as sql-jdbc.execute]
             [metabase.driver.sql.util :as sql.u]
             [metabase.util.i18n :refer [trs]]))
 
@@ -98,26 +99,30 @@
 (defn- describe-schema
   "Gets a set of maps for all tables in the given `catalog` and `schema`."
   [driver conn catalog schema]
-  (let [sql (describe-schema-sql driver catalog schema)]
-    (log/trace (trs "Running statement in describe-schema: {0}" sql))
-    (into #{} (comp (filter (fn [{table-name :table}]
-                              (have-select-privilege? driver conn schema table-name)))
-                    (map (fn [{table-name :table}]
-                           {:name        table-name
-                            :schema      schema})))
-          (jdbc/reducible-query {:connection conn} sql))))
+  (with-open [stmt (.createStatement conn)]
+    (let [sql (describe-schema-sql driver catalog schema)
+          rs (sql-jdbc.execute/execute-statement! driver stmt sql)]
+      (into 
+       #{} 
+       (comp (filter (fn [{table-name :table}]
+                                (have-select-privilege? driver conn schema table-name)))
+                      (map (fn [{table-name :table}]
+                             {:name        table-name
+                              :schema      schema}))) 
+       (jdbc/reducible-result-set rs {})))))
 
 (defn- all-schemas
   "Gets a set of maps for all tables in all schemas in the given `catalog`."
   [driver conn catalog]
-  (let [sql (describe-catalog-sql driver catalog)]
-    (log/trace (trs "Running statement in all-schemas: {0}" sql))
-    (into []
-          (map (fn [{:keys [schema] :as full}]
-                 (when-not (contains? excluded-schemas schema)
-                   (describe-schema driver conn catalog schema))))
-          (jdbc/reducible-query {:connection conn} sql))))
-
+  (with-open [stmt (.createStatement conn)]
+    (let [sql (describe-catalog-sql driver catalog)
+          rs (sql-jdbc.execute/execute-statement! driver stmt sql)]
+      (into []
+            (map (fn [{:keys [schema] :as full}]
+                   (when-not (contains? excluded-schemas schema)
+                     (describe-schema driver conn catalog schema))))
+            (jdbc/reducible-result-set rs {})))))
+  
 (defmethod driver/describe-database :starburst
   [driver {{:keys [catalog schema] :as details} :details :as database}]
   (with-open [conn (-> (sql-jdbc.conn/db->pooled-connection-spec database)
@@ -129,9 +134,10 @@
 (defmethod driver/describe-table :starburst
   [driver {{:keys [catalog] :as details} :details :as database} {schema :schema, table-name :name}]
   (with-open [conn (-> (sql-jdbc.conn/db->pooled-connection-spec database)
-                       jdbc/get-connection)]
-    (let [sql (describe-table-sql driver catalog schema table-name)]
-      (log/trace (trs "Running statement in describe-table: {0}" sql))
+                       jdbc/get-connection) 
+              stmt (.createStatement conn)] 
+    (let [sql (describe-table-sql driver catalog schema table-name)
+          rs (sql-jdbc.execute/execute-statement! driver stmt sql)]
       {:schema schema
        :name   table-name
        :fields (into
@@ -141,9 +147,13 @@
                                 :database-type type
                                 :base-type         (starburst-type->base-type type)
                                 :database-position idx}))
-                (jdbc/reducible-query {:connection conn} sql))})))
+                (jdbc/reducible-result-set rs {}))})))
 
-(defmethod sql-jdbc.sync/db-default-timezone :starburst
-  [_ spec]   
-  (let [[{:keys [time-zone]}] (jdbc/query spec "SELECT current_timezone() as \"time-zone\"")]
-    time-zone))
+(defmethod driver/db-default-timezone :starburst
+  [driver {{:keys [catalog] :as details} :details :as database}]
+  (with-open [conn (-> (sql-jdbc.conn/db->pooled-connection-spec database)
+                       jdbc/get-connection)
+              stmt (.createStatement conn)]
+    (let [rs (sql-jdbc.execute/execute-statement! driver stmt "SELECT current_timezone() as \"time-zone\"")
+          [{:keys [time-zone]}] (jdbc/result-set-seq rs)]
+      time-zone)))
