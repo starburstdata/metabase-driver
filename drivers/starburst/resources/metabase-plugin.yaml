@@ -1,6 +1,6 @@
 info:
   name: Metabase Starburst Driver
-  version: 1.0.6-RC-1
+  version: 1.0.6
   description: Allows Metabase to connect to Starburst Enterprise, Starburst Galaxy, and Trino query engines.
 contact-info:
   name: Starburst
