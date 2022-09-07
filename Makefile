@@ -34,7 +34,7 @@ clean:
 	@echo "Force cleaning Metabase repo..."
 	cd $(makefile_dir)/metabase/modules/drivers && git reset --hard && git clean -f
 	@echo "Checking out metabase at: $(metabase_version)"
-	cd $(makefile_dir)/metabase/modules/drivers && git fetch && git checkout $(metabase_version);
+	cd $(makefile_dir)/metabase/modules/drivers && git fetch --all --tags && git checkout $(metabase_version);
 
 link_to_driver:
 ifeq ($(wildcard $(makefile_dir)/metabase/modules/drivers/starburst/src),)
