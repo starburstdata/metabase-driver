@@ -6,7 +6,8 @@ trino_version := $(shell jq '.trino' app_versions.json)
 metabase_version := $(shell jq '.metabase' app_versions.json)
 
 makefile_dir := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-is_trino_started := $(shell curl --fail --silent --insecure http://localhost:8080/v1/info | jq '.starting')
+trino_port := 8082
+is_trino_started := $(shell curl --fail --silent --insecure http://localhost:$(trino_port)/v1/info | jq '.starting')
 
 clone_metabase_if_missing:
 ifeq ($(wildcard $(makefile_dir)/metabase/.),)
@@ -25,7 +26,7 @@ checkout_latest_metabase_tag: clone_metabase_if_missing clean
 start_trino_if_missing:
 ifeq ($(is_trino_started),)
 	@echo "Trino not started, starting using version $(trino_version)...";
-	cd $(makefile_dir)/resources/docker/trino; docker build -t trino-metabase-test . --build-arg version=$(trino_version); docker run --rm -d  -p 8080:8080/tcp trino-metabase-test:latest
+	cd $(makefile_dir)/resources/docker/trino; docker build -t trino-metabase-test . --build-arg version=$(trino_version); docker run --rm -d  -p $(trino_port):8080/tcp trino-metabase-test:latest
 else
 	@echo "Trino started, skipping initialization."
 endif
