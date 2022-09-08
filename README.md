@@ -61,6 +61,11 @@ If needed, `make checkout_latest_metabase_tag` will update Metabase to its lates
 * [Driver Development Announcements](https://www.metabase.com/docs/latest/developers-guide-drivers.html#driver-development-announcements)
 * [Driver Development Form](https://discourse.metabase.com/c/driver-development)
 * [Metabase](https://www.metabase.com/)
+* [Learn Clojure](https://clojure.org/guides/learn/clojure)
+* [Clojure Docs](https://clojuredocs.org/clojure.core)
+* [Clojure Cheatsheet](https://clojure.org/api/cheatsheet)
+* [Clojure JDBC](https://clojure-doc.org/articles/ecosystem/java_jdbc/using_sql/)
+* [Clojure](https://clojure.org/index)
 
 ## Contact
 For feature requests and bugs, please create an issue in this repo. For further support, see the following resources:
