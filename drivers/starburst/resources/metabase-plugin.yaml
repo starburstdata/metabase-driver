@@ -37,6 +37,10 @@ driver:
     - merge:
         - additional-options
         - placeholder: "trustServerCertificate=false"
+    - name: roles
+      display-name: Role (optional)
+      required: false
+      helper-text: Specify a role to override the database user’s default role.
     - default-advanced-options
 
 init:
