@@ -53,6 +53,13 @@
         remove-blank-vals
         (set/rename-keys kerb-props->url-param-names))))
 
+(defn- prepare-roles [{:keys [roles] :as details}]
+  (if (str/blank? roles)
+    (dissoc details :roles)
+    (assoc details :roles (str "system:" roles))
+  )
+)
+
 (defn- prepare-addl-opts [{:keys [SSL kerberos additional-options] :as details}]
   (let [det (if kerberos
               (if-not SSL
@@ -71,7 +78,7 @@
 
 (defn- jdbc-spec
   "Creates a spec for `clojure.java.jdbc` to use for connecting to Starburst via JDBC, from the given `opts`."
-  [{:keys [host port catalog schema]
+       [{:keys [host port catalog schema roles]
     :or   {host "localhost", port 5432, catalog ""}
     :as   details}]
   (-> details
@@ -79,6 +86,7 @@
               :subprotocol "trino"
               :subname     (mdb.spec/make-subname host port (db-name catalog schema))})
       prepare-addl-opts
+      prepare-roles
       (dissoc :host :port :db :catalog :schema :tunnel-enabled :engine :kerberos)
       sql-jdbc.common/handle-additional-options))
 

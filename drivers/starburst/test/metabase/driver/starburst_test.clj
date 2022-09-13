@@ -232,3 +232,12 @@
                    :ssl                          true}
           jdbc-spec (sql-jdbc.conn/connection-details->spec :starburst details)]
       (is (true? (str/starts-with? (:source jdbc-spec) "Starburst Metabase"))))))
+
+(deftest role-property-test
+  (testing "Role is set correctly"
+    (let [details {:host                          "starburst-server"
+                  :port                          7778
+                  :roles                         "my_role"
+                  :catalog                       "my-catalog"}
+          jdbc-spec (sql-jdbc.conn/connection-details->spec :starburst details)]
+          (is (true? (= (:roles jdbc-spec) "system:my_role"))))))
