@@ -121,11 +121,12 @@
 
 (defmethod sql-jdbc.execute/read-column-thunk [:starburst Types/TIMESTAMP_WITH_TIMEZONE]
   [_ ^ResultSet rset _ ^long i]
-  ;; Converts TIMESTAMP_WITH_TIMEZONE to instant, then to OffsetDateTime with default time zone.
+  ;; Converts TIMESTAMP_WITH_TIMEZONE to java.time.ZonedDateTime, then to OffsetDateTime with UTC time zone
   (fn []
-    (when-let [t (.getObject rset i java.sql.Timestamp)] 
-      (let [instant (.toInstant t)] 
-        (.atOffset instant (t/zone-offset 0))))))
+    (let [zonedDateTime (.getObject rset i java.time.ZonedDateTime)
+          utcTimeZone (java.time.ZoneId/of "UTC")]
+      (.toOffsetDateTime (.withZoneSameInstant zonedDateTime utcTimeZone))
+    )))
 
 (defmethod sql-jdbc.execute/read-column-thunk [:starburst Types/TIME_WITH_TIMEZONE]
   [_ rs _ i]
