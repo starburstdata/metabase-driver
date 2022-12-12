@@ -2,6 +2,9 @@
 
 ## [1.0.7] - 2022-12-12
 
+-   Update trino test port to 8082
+-   Add optional role field in the connection form
+
 ## [1.0.6] - 2022-08-16
 
 -   Remove prepared statements from sync
