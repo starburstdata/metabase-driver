@@ -1,8 +1,10 @@
 ## [Unreleased]
 
+## [1.44.0] - 2022-12-12
+
 ## [1.0.6] - 2022-08-16
 
-- Remove prepared statements from sync
+-   Remove prepared statements from sync
 
 ## [1.0.6-RC-1] - 2022-08-11
 
@@ -38,7 +40,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.6...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.44.0...HEAD
+
+[1.44.0]: https://github.com/starburstdata/metabase-driver/compare/1.0.6...1.44.0
 
 [1.0.6]: https://github.com/starburstdata/metabase-driver/compare/1.0.6-RC-1...1.0.6
 
