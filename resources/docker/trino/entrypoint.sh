@@ -46,7 +46,8 @@ geographical_tips
 half-valid-urls 
 half_valid_urls 
 tupac-sightings 
-tupac_sightings"
+tupac_sightings
+times_mixed"
 
 for catalog in $MEMORY_CATALOGS
 do
