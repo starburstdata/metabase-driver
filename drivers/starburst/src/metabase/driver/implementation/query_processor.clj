@@ -112,6 +112,10 @@
   [_ _ expr]
   expr)
 
+(defmethod sql.qp/date [:starburst :second-of-minute]
+  [_ _ expr]
+  (hsql/call :second (in-report-zone expr)))
+
 (defmethod sql.qp/date [:starburst :minute]
   [_ _ expr]
   (hsql/call :date_trunc (hx/literal :minute) (in-report-zone expr)))
@@ -148,6 +152,10 @@
   [_ _ expr]
   (sql.qp/adjust-start-of-week :starburst (partial hsql/call :date_trunc (hx/literal :week)) (in-report-zone expr)))
 
+(defmethod sql.qp/date [:starburst :week-of-year-iso]
+  [_ _ expr]
+  (hsql/call :week (in-report-zone expr)))
+
 (defmethod sql.qp/date [:starburst :month]
   [_ _ expr]
   (hsql/call :date_trunc (hx/literal :month) (in-report-zone expr)))
@@ -167,6 +175,10 @@
 (defmethod sql.qp/date [:starburst :year]
   [_ _ expr]
   (hsql/call :date_trunc (hx/literal :year) (in-report-zone expr)))
+
+(defmethod sql.qp/date [:starburst :year-of-era]
+  [_ _ expr]
+  (hsql/call :year (in-report-zone expr)))
 
 (defmethod sql.qp/current-datetime-honeysql-form :starburst
   [_]
