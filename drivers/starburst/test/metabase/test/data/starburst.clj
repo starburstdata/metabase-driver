@@ -138,7 +138,7 @@
   [driver dbdef tabledef]
   ;; strip out the PRIMARY KEY stuff from the CREATE TABLE statement
   (let [sql ((get-method sql.tx/create-table-sql :sql/test-extensions) driver dbdef tabledef)]
-    (str/replace sql #", PRIMARY KEY \([^)]+\)" "")))
+    (str/replace sql #", PRIMARY KEY \([^)]+\)|NOT NULL" "")))
 
 (defmethod ddl.i/format-name :starburst [_ table-or-field-name]
   (u/snake-key table-or-field-name))
