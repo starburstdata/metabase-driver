@@ -98,7 +98,7 @@
         db-type     (hx/type-info->db-type type-info)]
     (if (and ;; AT TIME ZONE is only valid on these Trino types; if applied to something else (ex: `date`), then
              ;; an error will be thrown by the query analyzer
-         (contains? #{"timestamp" "timestamp with time zone" "time" "time with time zone"} db-type)
+         (and db-type (re-find #"(?i)^time(?:stamp)?(?:\(\d+\))?(?: with time zone)?$" db-type))
              ;; if one has already been set, don't do so again
          (not (::in-report-zone? (meta expr)))
          report-zone)
