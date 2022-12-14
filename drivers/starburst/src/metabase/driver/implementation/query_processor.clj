@@ -17,10 +17,13 @@
             [honeysql.helpers :as hh]
             [java-time :as t]
             [metabase.driver.sql.query-processor :as sql.qp]
+            [metabase.driver.sql-jdbc.sync :as sql-jdbc.sync]
+            [metabase.query-processor.error-type :as qp.error-type]
             [metabase.query-processor.timezone :as qp.timezone]
             [metabase.util :as u]
             [metabase.util.date-2 :as u.date]
-            [metabase.util.honeysql-extensions :as hx])
+            [metabase.util.honeysql-extensions :as hx]
+            [metabase.util.i18n :refer [tru]])
     (:import [java.time OffsetDateTime ZonedDateTime]))
 
 (def ^:private ^:const timestamp-with-time-zone-db-type "timestamp with time zone")
@@ -221,3 +224,27 @@
   [_ _ expr]
   (let [report-zone (qp.timezone/report-timezone-id-if-supported :starburst)]
     (hsql/call :from_unixtime expr (hx/literal (or report-zone "UTC")))))
+
+(defmethod sql.qp/->honeysql [:starburst :datetime-diff]
+  [driver [_ x y unit]]
+  (let [x (sql.qp/->honeysql driver x)
+        y (sql.qp/->honeysql driver y)
+        disallowed-types (keep
+                          (fn [v]
+                            (when-let [db-type (keyword (hx/type-info->db-type (hx/type-info v)))]
+                              (let [base-type (sql-jdbc.sync/database-type->base-type driver db-type)]
+                                (when-not (some #(isa? base-type %) [:type/Date :type/DateTime])
+                                  (name db-type)))))
+                          [x y])]
+    (when (seq disallowed-types)
+      (throw (ex-info (tru "Only datetime, timestamp, or date types allowed. Found {0}"
+                           (pr-str disallowed-types))
+                      {:found disallowed-types
+                       :type  qp.error-type/invalid-query})))
+    (case unit
+      (:year :quarter :month :week :day)
+      (let [x-date (hsql/call :date (->AtTimeZone x (qp.timezone/results-timezone-id)))
+            y-date (hsql/call :date (->AtTimeZone y (qp.timezone/results-timezone-id)))]
+        (hsql/call :date_diff (hx/literal unit) x-date y-date))
+      (:hour :minute :second)
+      (hsql/call :date_diff (hx/literal unit) x y))))
