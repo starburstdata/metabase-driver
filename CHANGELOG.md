@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+- Bump Metabase version to v1.45.0
+- Adds [convertTimezone](https://www.metabase.com/docs/latest/questions/query-builder/expressions/converttimezone) support
+- Adds [datetimeDiff](https://www.metabase.com/docs/latest/questions/query-builder/expressions/datetimediff) support
+
 ## [1.0.7] - 2022-12-12
 
 -   Update trino test port to 8082
