@@ -17,6 +17,7 @@
             [honeysql.helpers :as hh]
             [java-time :as t]
             [metabase.driver.sql.query-processor :as sql.qp]
+            [metabase.driver.sql.util :as sql.u]
             [metabase.driver.sql-jdbc.sync :as sql-jdbc.sync]
             [metabase.query-processor.error-type :as qp.error-type]
             [metabase.query-processor.timezone :as qp.timezone]
@@ -248,3 +249,16 @@
         (hsql/call :date_diff (hx/literal unit) x-date y-date))
       (:hour :minute :second)
       (hsql/call :date_diff (hx/literal unit) x y))))
+
+(defmethod sql.qp/->honeysql [:starburst :convert-timezone]
+  [driver [_ arg target-timezone source-timezone]]
+  (let [expr         (sql.qp/->honeysql driver (cond-> arg
+                                                 (string? arg) u.date/parse))
+        with_timezone? (hx/is-of-type? expr #"(?i)^timestamp(?:\(\d+\))? with time zone$")
+        _ (sql.u/validate-convert-timezone-args with_timezone? target-timezone source-timezone)
+        expr (hsql/call :at_timezone
+                        (if with_timezone?
+                          expr
+                          (hsql/call :with_timezone expr (or source-timezone (qp.timezone/results-timezone-id))))
+                        target-timezone)]
+    (hx/with-database-type-info (hx/->timestamp expr) "timestamp")))
