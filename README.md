@@ -10,10 +10,11 @@ Our build scripts will git clone the Metabase repo to `./metabase` and copy all 
 expected folder: `./metabase/modules/drivers/starburst`. From here, we leverage the Metabase build scripts to 
 build our `.jar` file into the correct dir, run tests, and start the local server.
 
-### Dependencies
-
+### Prerequisites
 * [Docker](https://www.docker.com/)
 * [Clojure](https://clojure.org/guides/install_clojure)
+* [jq](https://stedolan.github.io/jq/download/)
+* [Metabase Prerequisites](https://www.metabase.com/docs/latest/developers-guide/build#install-the-prerequisites)
 
 ##### Quick Start
 Run `make build test` to build and run tests locally. If everything passes, you're good to go!
