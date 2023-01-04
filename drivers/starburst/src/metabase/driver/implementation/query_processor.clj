@@ -255,12 +255,10 @@
                       {:found disallowed-types
                        :type  qp.error-type/invalid-query})))
     (case unit
-      (:year :quarter :month :week :day)
-      (let [x-date (hsql/call :date (->AtTimeZone x (qp.timezone/results-timezone-id)))
-            y-date (hsql/call :date (->AtTimeZone y (qp.timezone/results-timezone-id)))]
-        (hsql/call :date_diff (hx/literal unit) x-date y-date))
-      (:hour :minute :second)
-      (hsql/call :date_diff (hx/literal unit) x y))))
+      (:year :quarter :month :week :day :hour :minute :second)
+      (let [x-date (hx/->timestamp x)
+            y-date (hx/->timestamp y)]
+        (hsql/call :date_diff (hx/literal unit) x-date y-date)))))
 
 (defmethod sql.qp/->honeysql [:starburst :convert-timezone]
   [driver [_ arg target-timezone source-timezone]]
