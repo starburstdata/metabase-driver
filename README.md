@@ -35,7 +35,9 @@ This command starts a local Metabase server on port `3000`. If you want to build
 Once you have built all required resources with the `make build` command, run `make test`. This command builds your local driver changes and then starts Starburst driver tests.
 
 #### Staring a Trino Server in Docker 
-Running `make test` will start a trino server for you on port 8082 when needed, but if you want to start one, you can run `make start_trino_if_missing`.
+Running `make test` will start a Trino server for you on port 8082 when needed, but if you want to start one, you can run `make start_trino_if_missing`.
+
+*Note:* Running `make test` will populate the Trino catalogs with mock data that is used for testing. You can then connect Metabase to this Trino server to view that data. This is useful for manual testing.
 
 #### Executing Specific Tests
 You can cd into the metabase repo and run commands like:
