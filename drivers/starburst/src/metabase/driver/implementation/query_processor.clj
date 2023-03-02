@@ -238,6 +238,13 @@
   (let [report-zone (qp.timezone/report-timezone-id-if-supported :starburst)]
     (hsql/call :from_unixtime expr (hx/literal (or report-zone "UTC")))))
 
+(defn- safe-datetime [x]
+  (cond
+    (nil? x) x
+    (= (type x) java.time.LocalDate) (hx/->timestamp x)
+    (= (keyword (hx/type-info->db-type (hx/type-info x))) :date) (hx/->timestamp x)
+    :else x))
+
 (defmethod sql.qp/->honeysql [:starburst :datetime-diff]
   [driver [_ x y unit]]
   (let [x (sql.qp/->honeysql driver x)
@@ -256,9 +263,10 @@
                        :type  qp.error-type/invalid-query})))
     (case unit
       (:year :quarter :month :week :day)
-      (let [x-date (hsql/call :date (->AtTimeZone x (qp.timezone/results-timezone-id)))
-            y-date (hsql/call :date (->AtTimeZone y (qp.timezone/results-timezone-id)))]
+      (let [x-date (hsql/call :date (->AtTimeZone (safe-datetime x) (qp.timezone/results-timezone-id)))
+            y-date (hsql/call :date (->AtTimeZone (safe-datetime y) (qp.timezone/results-timezone-id)))]
         (hsql/call :date_diff (hx/literal unit) x-date y-date))
+
       (:hour :minute :second)
       (hsql/call :date_diff (hx/literal unit) x y))))
 

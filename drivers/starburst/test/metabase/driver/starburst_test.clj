@@ -241,3 +241,33 @@
                   :catalog                       "my-catalog"}
           jdbc-spec (sql-jdbc.conn/connection-details->spec :starburst details)]
           (is (true? (= (:roles jdbc-spec) "system:my_role"))))))
+
+(deftest datetime-diff-base-test
+  (mt/test-drivers (mt/normal-drivers-with-feature :datetime-diff)
+    (mt/dataset sample-dataset
+      (letfn [(query [x y unit]
+                (->> (mt/run-mbql-query orders
+                       {:limit 1
+                        :expressions {"diff"     [:datetime-diff x y unit]
+                                      "diff-rev" [:datetime-diff y x unit]}
+                        :fields [[:expression "diff"]
+                                 [:expression "diff-rev"]]})
+                     (mt/formatted-rows [int int])
+                     first))]
+             (doseq [[unit cases] [[:year [["2021-10-03" "2022-10-02" 0 "day under a year"]
+                                           ["2021-10-03" "2022-10-03" 1 "same day"]
+                                           ["2017-06-10" "2019-07-10" 2 "multiple years"]]]
+                                   [:month [["2022-10-03" "2022-11-02" 0  "day under a month"]
+                                            ["2022-10-02" "2022-11-02" 1  "just one month"]
+                                            ["2022-10-02" "2023-10-03" 12 "over a year"]]]
+                                   [:week [["2022-10-01" "2022-10-04" 0   "under 7 days across week boundary"]
+                                           ["2022-10-02" "2022-10-09" 1   "just one week"]
+                                           ["2022-10-02" "2023-10-03" 52 "over a year"]]]
+                                   [:day [["2022-10-02" "2022-10-02" 0   "same day"]
+                                          ["2022-10-02" "2022-10-03" 1   "consecutive days"]
+                                          ["2021-10-02" "2022-10-05" 368 "over a year"]]]]
+
+                [x y expected description] cases]
+          (testing (name unit)
+            (testing description
+              (is (= [expected (- expected)] (query x y unit))))))))))
