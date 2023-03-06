@@ -7,6 +7,8 @@ on:
     paths-ignore:
       - '**/*.md'
   pull_request:
+    branches:
+      - main
   workflow_dispatch: # Allows to trigger workflow manually or via API
 
 env:
@@ -25,13 +27,13 @@ jobs:
     # This job is executed only if any dependency fails to mark entire workflow execution as failure.
     # Otherwise it is skipped which is treated as success of the entire workflow execution.
     if: ${{ !success() }}
-    runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-latest, ubuntu-20.04]
     needs: [release]
     steps:
       - run: false
 
   release:
-    runs-on: ubuntu-20.04
+    runs-on: [ubuntu-latest, ubuntu-20.04]
     strategy:
       fail-fast: false
     timeout-minutes: 30
