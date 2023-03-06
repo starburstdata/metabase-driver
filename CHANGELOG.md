@@ -1,8 +1,10 @@
 ## [Unreleased]
 
-- Bump Metabase version to v1.45.0
-- Adds [convertTimezone](https://www.metabase.com/docs/latest/questions/query-builder/expressions/converttimezone) support
-- Adds [datetimeDiff](https://www.metabase.com/docs/latest/questions/query-builder/expressions/datetimediff) support
+## [2.0.0] - 2023-03-06
+
+-   Bump Metabase version to v1.45.0
+-   Adds [convertTimezone](https://www.metabase.com/docs/latest/questions/query-builder/expressions/converttimezone) support
+-   Adds [datetimeDiff](https://www.metabase.com/docs/latest/questions/query-builder/expressions/datetimediff) support
 
 ## [1.0.7] - 2022-12-12
 
@@ -47,7 +49,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/1.0.7...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/2.0.0...HEAD
+
+[2.0.0]: https://github.com/starburstdata/metabase-driver/compare/1.0.7...2.0.0
 
 [1.0.7]: https://github.com/starburstdata/metabase-driver/compare/1.0.6...1.0.7
 
