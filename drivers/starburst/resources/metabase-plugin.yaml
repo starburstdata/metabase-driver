@@ -33,14 +33,14 @@ driver:
         - password
         - required: false
     - ssl
-    - advanced-options-start
-    - merge:
-        - additional-options
-        - placeholder: "trustServerCertificate=false"
     - name: roles
       display-name: Role (optional)
       required: false
       helper-text: Specify a role to override the database user’s default role.
+    - advanced-options-start
+    - merge:
+        - additional-options
+        - placeholder: "trustServerCertificate=false"
     - default-advanced-options
 
 init:
