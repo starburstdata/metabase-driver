@@ -125,7 +125,9 @@
   (fn []
     (let [zonedDateTime (.getObject rset i java.time.ZonedDateTime)
           utcTimeZone (java.time.ZoneId/of "UTC")]
-      (.toOffsetDateTime (.withZoneSameInstant zonedDateTime utcTimeZone))
+      (cond
+        (nil? zonedDateTime) nil
+        :else (.toOffsetDateTime (.withZoneSameInstant zonedDateTime utcTimeZone)))
     )))
 
 (defmethod sql-jdbc.execute/read-column-thunk [:starburst Types/TIME_WITH_TIMEZONE]
