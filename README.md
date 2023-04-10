@@ -6,9 +6,7 @@ it must be stored in the `plugins` directory within the Metabase working dir. Se
 
 ## App Supported Versions
 
-| Release 	| Trino 	| Clojure     	| Metabase 	|
-|---------	|-------	|-------------	|----------	|
-| 2.0.1   	| 384   	| 1.11.0.1100 	| v1.45.0  	|
+Please see [supported versions](app_versions.json) for this release.
 
 ## Developers Guide Drivers
 
