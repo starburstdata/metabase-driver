@@ -4,6 +4,12 @@
 The Starburst Driver `.jar` binary can be downloaded from our releases in github. Once it is downloaded, 
 it must be stored in the `plugins` directory within the Metabase working dir. See: https://www.metabase.com/docs/latest/developers-guide-drivers.html#how-to-use-a-third-party-driver
 
+## App Supported Versions
+
+| Release 	| Trino 	| Clojure     	| Metabase 	|
+|---------	|-------	|-------------	|----------	|
+| 2.0.1   	| 384   	| 1.11.0.1100 	| v1.45.0  	|
+
 ## Developers Guide Drivers
 
 Our build scripts will git clone the Metabase repo to `./metabase` and copy all Starburst driver files into the 
