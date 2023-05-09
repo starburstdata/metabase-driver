@@ -77,7 +77,7 @@ update_deps_files:
 
 test: start_trino_if_missing link_to_driver update_deps_files
 	@echo "Testing Starburst driver..."
-	cd $(makefile_dir)/metabase/; DRIVERS=starburst clojure -X:dev:drivers:drivers-dev:test
+	cd $(makefile_dir)/metabase/; DRIVERS=starburst MB_STARBURST_TEST_PORT=$(trino_port) clojure -X:dev:drivers:drivers-dev:test
 
 build: clone_metabase_if_missing update_deps_files link_to_driver front_end driver
 
