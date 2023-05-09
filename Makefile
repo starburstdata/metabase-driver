@@ -47,7 +47,7 @@ endif
 
 front_end:
 	@echo "Building Front End..."
-	cd $(makefile_dir)/metabase/; yarn build && yarn build-static-viz
+	cd $(makefile_dir)/metabase/; export WEBPACK_BUNDLE=production && yarn build && yarn build-static-viz
 
 driver: update_deps_files
 	@echo "Building Starburst driver..."
