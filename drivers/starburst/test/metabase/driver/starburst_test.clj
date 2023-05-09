@@ -15,7 +15,6 @@
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
             [clojure.test :refer :all]
-            [honeysql.core :as hsql]
             [java-time :as t]
             [metabase.api.database :as api.database]
             [metabase.db.metadata-queries :as metadata-queries]
@@ -98,7 +97,7 @@
     (is (= {:select ["name" "id"]
             :from   [{:select   [[:default.categories.name "name"]
                                  [:default.categories.id "id"]
-                                 [(hsql/raw "row_number() OVER (ORDER BY \"default\".\"categories\".\"id\" ASC)")
+                                 [[:raw "row_number() OVER (ORDER BY default.categories.id ASC)"]
                                   :__rownum__]]
                       :from     [:default.categories]
                       :order-by [[:default.categories.id :asc]]}]
@@ -145,7 +144,7 @@
                                              {:aggregation [[:count]]
                                               :filter      [:= $name "wow"]})]
                     (testing "The native query returned in query results should use user-friendly splicing"
-                      (is (= (str "SELECT count(*) AS \"count\" "
+                      (is (= (str "SELECT COUNT(*) AS \"count\" "
                                   "FROM \"default\".\"test_data_venues\" "
                                   "WHERE \"default\".\"test_data_venues\".\"name\" = 'wow'")
                              (:query (qp/compile-and-splice-parameters query))
