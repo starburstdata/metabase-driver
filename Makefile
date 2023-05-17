@@ -1,6 +1,7 @@
 .PHONY: clone_metabase_if_missing clean link_to_driver front_end driver update_deps_files server test all release
 .DEFAULT_GOAL := all
 export MB_EDITION=ee
+export NODE_OPTIONS='--max-old-space-size=4096'
 
 trino_version := $(shell jq '.trino' app_versions.json)
 metabase_version := $(shell jq '.metabase' app_versions.json)
