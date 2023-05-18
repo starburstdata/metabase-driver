@@ -1,4 +1,9 @@
 ## [Unreleased]
+- Bump Metabase version to v1.46.3
+- Migrate to Honey SQL 2
+- Refactor unit test catalogs
+- Enable now support
+- Set metabase version to patch branch 
 
 ## [2.0.0] - 2023-03-06
 
