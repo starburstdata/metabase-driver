@@ -111,7 +111,7 @@
                   (update :kerberos str->bool)
                   (update :kerberos-delegation bool->str)
                   (assoc :SSL (:ssl details-map))
-                  (assoc :source "Starburst Metabase 2.0.0")
+                  (assoc :source "Starburst Metabase 3.0.0")
 
                 ;; remove any Metabase specific properties that are not recognized by the Trino JDBC driver, which is
                 ;; very picky about properties (throwing an error if any are unrecognized)

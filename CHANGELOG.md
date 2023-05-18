@@ -1,9 +1,12 @@
 ## [Unreleased]
-- Bump Metabase version to v1.46.3
-- Migrate to Honey SQL 2
-- Refactor unit test catalogs
-- Enable now support
-- Set metabase version to patch branch 
+
+## [3.0.0] - 2023-05-18
+
+-   Bump Metabase version to v1.46.3
+-   Migrate to Honey SQL 2
+-   Refactor unit test catalogs
+-   Enable now support
+-   Set metabase version to patch branch 
 
 ## [2.0.0] - 2023-03-06
 
@@ -54,7 +57,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/2.0.0...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/3.0.0...HEAD
+
+[3.0.0]: https://github.com/starburstdata/metabase-driver/compare/2.0.0...3.0.0
 
 [2.0.0]: https://github.com/starburstdata/metabase-driver/compare/1.0.7...2.0.0
 
