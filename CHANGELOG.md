@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [3.0.1] - 2023-05-25
+
+-   Bump Metabase version to v1.46.4
+
 ## [3.0.0] - 2023-05-18
 
 -   Bump Metabase version to v1.46.3
