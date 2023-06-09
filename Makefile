@@ -83,4 +83,4 @@ test: start_trino_if_missing link_to_driver update_deps_files
 build: clone_metabase_if_missing update_deps_files link_to_driver front_end driver
 
 docker-image:
-	cd $(makefile_dir)/metabase/; export MB_EDITION=ee && ./bin/build && mv target/uberjar/metabase.jar bin/docker/ && docker build -t metabase-dev --build-arg MB_EDITION=ee ./bin/docker/
+	cd $(makefile_dir)/metabase/; export MB_EDITION=ee && ./bin/build.sh && mv target/uberjar/metabase.jar bin/docker/ && docker build -t metabase-dev --build-arg MB_EDITION=ee ./bin/docker/
