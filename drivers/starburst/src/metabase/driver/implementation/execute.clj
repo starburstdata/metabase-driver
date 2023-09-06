@@ -20,6 +20,7 @@
             [metabase.driver.sql-jdbc.execute :as sql-jdbc.execute]
             [metabase.driver.sql.parameters.substitution :as sql.params.substitution]
             [metabase.query-processor.timezone :as qp.timezone]
+            [metabase.api.common :as api]
             [metabase.util.date-2 :as u.date]
             [metabase.util.i18n :refer [trs]])
   (:import com.mchange.v2.c3p0.C3P0ProxyConnection
@@ -144,10 +145,26 @@
 ;;; |                                          SQL Statment Operations                                               |
 ;;; +----------------------------------------------------------------------------------------------------------------+
 
+(defn impersonate-user
+  [conn]
+  (if
+    (clojure.string/includes? (.getProperty (.getClientInfo conn) "ClientInfo") "impersonate:true")
+    (let [email (get (deref api/*current-user*) :email)]
+      (.setSessionUser (.unwrap conn TrinoConnection) email))
+    nil))
+
+(defn remove-impersonation
+  [conn]
+  (if
+    (clojure.string/includes? (.getProperty (.getClientInfo conn) "ClientInfo") "impersonate:true")
+    (.clearSessionUser (.unwrap conn TrinoConnection))
+    nil))
+
 (defmethod sql-jdbc.execute/prepared-statement :starburst
   [driver ^Connection conn ^String sql params]
   ;; with Starburst driver, result set holdability must be HOLD_CURSORS_OVER_COMMIT
   ;; defining this method simply to omit setting the holdability
+  (impersonate-user conn)
   (let [stmt (.prepareStatement conn
                                 sql
                                 ResultSet/TYPE_FORWARD_ONLY
@@ -158,15 +175,22 @@
         (catch Throwable e
           (log/debug e (trs "Error setting prepared statement fetch direction to FETCH_FORWARD"))))
       (sql-jdbc.execute/set-parameters! driver stmt params)
-      stmt
+      (proxy [java.sql.PreparedStatement] []
+        (executeQuery []
+          (let [rs (.executeQuery stmt)]
+            (remove-impersonation conn)
+            rs))
+        (setMaxRows [nb] (.setMaxRows stmt nb))
+        (close [] (.close stmt)))
       (catch Throwable e
+        (remove-impersonation conn)
         (.close stmt)
         (throw e)))))
-
 
 (defmethod sql-jdbc.execute/statement :starburst
   [_ ^Connection conn]
   ;; and similarly for statement (do not set holdability)
+  (impersonate-user conn)
   (let [stmt (.createStatement conn
                                ResultSet/TYPE_FORWARD_ONLY
                                ResultSet/CONCUR_READ_ONLY)]
@@ -174,7 +198,14 @@
       (.setFetchDirection stmt ResultSet/FETCH_FORWARD)
       (catch Throwable e
         (log/debug e (trs "Error setting statement fetch direction to FETCH_FORWARD"))))
-    stmt))
+    (proxy [java.sql.Statement] []
+      (execute [sql]
+        (let [rs (.execute stmt sql)]
+          (remove-impersonation conn)
+          rs))
+      (getResultSet [] (.getResultSet stmt))
+      (setMaxRows [nb] (.setMaxRows stmt nb))
+      (close [] (.close stmt)))))
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                          Prepared Statement Substitutions                                      |

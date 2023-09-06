@@ -23,6 +23,7 @@
             [metabase.driver.sql-jdbc.connection :as sql-jdbc.conn]
             [metabase.driver.sql.query-processor :as sql.qp]
             [metabase.models.database :refer [Database]]
+            [metabase.api.common :as api]
             [metabase.models.field :refer [Field]]
             [metabase.models.table :as table :refer [Table]]
             [metabase.query-processor :as qp]
@@ -270,3 +271,81 @@
           (testing (name unit)
             (testing description
               (is (= [expected (- expected)] (query x y unit))))))))))
+
+(deftest impersonation-properties-test
+  (testing "Impersonation related properties are set correctly"
+    (let [details {:host                         "starburst-server"
+                   :port                         7778
+                   :catalog                      "my-catalog"
+                   :ssl                          true
+                   :impersonation                true}
+          jdbc-spec (sql-jdbc.conn/connection-details->spec :starburst details)]
+      (is (= (str "impersonate:true")
+             (:clientInfo jdbc-spec))))))
+
+(deftest impersonation-query
+  (mt/test-driver :starburst
+    (testing "Make sure the right credentials are used depending on the impersonation checkbox"
+      (binding [api/*current-user* (atom {:email "metabase_user@user.com"})]
+        ;; By default the Trino user should the user defined in the database connection, i.e. "metabase"
+        (is (= [["metabase"]]
+          (mt/rows
+            (qp/process-query
+              {:database     (mt/id)
+              :type         :native
+              :native       {:query         "SELECT current_user"}}))))
+
+        ;; If impersonation is set, then the Trino user should be the current Metabase user, i.e. metabase_user@user.com
+        ;; The role is ignored as Metabase users may not have the role defined in the database connection
+        (is (= [["metabase_user@user.com"]]
+          (mt/rows
+          (let [details {
+            :host                         "localhost"
+            :port                         8082
+            :catalog                      "catalog"
+            :user                         "admin"
+            :roles                        "sysadmin"
+            :ssl                          false
+            :impersonation                true}]
+              (mt/with-temp Database [db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
+              (mt/with-db db
+              (qp/process-query
+                {:database     (mt/id)
+                :type         :native
+                :native       {:query         "SELECT current_user"}})))))))
+
+        ;; Because database user = metabase user, the role is passed in the Trino query
+        ;; This is expected to fail as the Trino container doesn't support roles
+        (is (thrown? Exception
+          (let [details {
+              :host                         "localhost"
+              :port                         8082
+              :catalog                      "catalog"
+              :user                         "metabase_user@user.com"
+              :roles                        "sysadmin"
+              :ssl                          false
+              :impersonation                true}]
+                (mt/with-temp Database [db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
+                (mt/with-db db
+                (qp/process-query
+                  {:database     (mt/id)
+                  :type         :native
+                  :native       {:query         "SELECT current_user"}}))))))
+
+        ;; With impersonation disabled the role is passed in the Trino query
+        ;; This is expected to fail as the Trino container doesn't support roles
+        (is (thrown? Exception
+          (let [details {
+              :host                         "localhost"
+              :port                         8082
+              :catalog                      "catalog"
+              :user                         "admin"
+              :roles                        "sysadmin"
+              :ssl                          false
+              :impersonation                false}]
+                (mt/with-temp Database [db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
+                (mt/with-db db
+                (qp/process-query
+                  {:database     (mt/id)
+                  :type         :native
+                  :native       {:query         "SELECT current_user"}}))))))))))

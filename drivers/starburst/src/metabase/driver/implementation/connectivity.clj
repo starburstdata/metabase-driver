@@ -15,6 +15,7 @@
   "Connectivity implementation for Starburst driver."
   (:require [clojure.set :as set]
             [clojure.string :as str]
+            [metabase.api.common :as api]
             [metabase.db.spec :as mdb.spec]
             [metabase.driver.sql-jdbc.common :as sql-jdbc.common]
             [metabase.driver.sql-jdbc.connection :as sql-jdbc.conn]
@@ -100,6 +101,14 @@
     (str v)
     v))
 
+; The role defined in the database should be ignored only if:
+; - The impersonation flag is checked AND
+; - The current user is NOT the database user
+(defn remove-role? [details-map]
+  (and
+    (:impersonation details-map)
+    (not= (get (deref api/*current-user*) :email) (:user details-map))))
+
 (defmethod sql-jdbc.conn/connection-details->spec :starburst
   [_ details-map]
   (let [props (-> details-map
@@ -112,6 +121,8 @@
                   (update :kerberos-delegation bool->str)
                   (assoc :SSL (:ssl details-map))
                   (assoc :source "Starburst Metabase 3.0.0")
+                  (assoc :clientInfo (if (:impersonation details-map) "impersonate:true" ""))
+                  (dissoc (if (remove-role? details-map) :roles :test))
 
                 ;; remove any Metabase specific properties that are not recognized by the Trino JDBC driver, which is
                 ;; very picky about properties (throwing an error if any are unrecognized)
