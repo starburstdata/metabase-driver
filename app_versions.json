@@ -1,5 +1,5 @@
 {
     "trino": "426",
-    "clojure": "1.11.1.1208",
-    "metabase": "v1.46.4"
+    "clojure": "1.11.1.1262",
+    "metabase": "v1.47.2"
 }

@@ -48,7 +48,7 @@ runs:
     - name: "Use Node.js"
       uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version: 18
     - name: Cache Clojure install
       id: cache-clojure
       uses: actions/cache@v3

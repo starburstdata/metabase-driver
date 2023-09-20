@@ -30,6 +30,7 @@
             [metabase.sync :as sync]
             [metabase.test :as mt]
             [metabase.test.fixtures :as fixtures]
+            [toucan2.tools.with-temp :as t2.with-temp]
             [toucan.db :as db]))
 
 (use-fixtures :once (fixtures/initialize :db))
@@ -188,7 +189,7 @@
                                      (format "DROP SCHEMA IF EXISTS %s" s)
                                      (format "CREATE SCHEMA %s" s)
                                      (format "CREATE TABLE %s.%s (pk INTEGER, val1 VARCHAR(512))" s t)])
-                      (mt/with-temp Database [db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details with-schema}]
+                      (t2.with-temp/with-temp [Database db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details with-schema}]
                         (mt/with-db db
             ;; same as test_data, but with schema, so should NOT pick up venues, users, etc.
                           (sync/sync-database! db)
@@ -307,7 +308,7 @@
             :roles                        "sysadmin"
             :ssl                          false
             :impersonation                true}]
-              (mt/with-temp Database [db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
+              (t2.with-temp/with-temp [Database db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
               (mt/with-db db
               (qp/process-query
                 {:database     (mt/id)
@@ -325,7 +326,7 @@
               :roles                        "sysadmin"
               :ssl                          false
               :impersonation                true}]
-                (mt/with-temp Database [db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
+                (t2.with-temp/with-temp [Database db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
                 (mt/with-db db
                 (qp/process-query
                   {:database     (mt/id)
@@ -343,7 +344,7 @@
               :roles                        "sysadmin"
               :ssl                          false
               :impersonation                false}]
-                (mt/with-temp Database [db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
+                (t2.with-temp/with-temp [Database db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
                 (mt/with-db db
                 (qp/process-query
                   {:database     (mt/id)
