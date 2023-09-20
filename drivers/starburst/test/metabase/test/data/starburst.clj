@@ -37,7 +37,8 @@
 (defmethod tx/sorts-nil-first? :starburst [_ _] false)
 
 ;; during unit tests don't treat Trino as having FK support
-(defmethod driver/supports? [:starburst :foreign-keys] [_ _] (not config/is-test?))
+(defmethod driver/database-supports? [:starburst :foreign-keys] [_ _ _] (not config/is-test?))
+(defmethod driver/database-supports? [:starburst :set-timezone] [_ _ _] true)
 
 (doseq [[base-type db-type] {:type/BigInteger             "BIGINT"
                              :type/Boolean                "BOOLEAN"
@@ -104,23 +105,28 @@
   combined with the fact that the Trino driver apparently closes the connection when it closes a prepare statement.
   Therefore, create a fresh connection from the DriverManager."
   ^Connection [jdbc-spec]
-  (DriverManager/getConnection (format "jdbc:%s:%s" (:subprotocol jdbc-spec) (:subname jdbc-spec))
-                               (connection-pool/map->properties (select-keys jdbc-spec [:user :SSL]))))
+  (let [conn (:connection jdbc-spec)]
+    (locking conn
+      (if (not (.getAutoCommit conn))
+        (.setAutoCommit conn true)
+        true))
+    conn))
 
 (defmethod load-data/do-insert! :starburst
   [driver spec table-identifier row-or-rows]
   (let [statements (ddl/insert-rows-ddl-statements driver table-identifier row-or-rows)]
-    (with-open [conn (jdbc-spec->connection spec)]
-      (doseq [[^String sql & params] statements]
-        (try
-          (with-open [^PreparedStatement stmt (.prepareStatement conn sql)]
-            (sql-jdbc.execute/set-parameters! driver stmt params)
-            (let [rows-affected (.executeUpdate stmt)]
-              (log/infof "[%s] Inserted %d rows into starburst table %s" driver rows-affected table-identifier)))
-          (catch Throwable e
-            (throw (ex-info (format "[%s] Error executing SQL: %s" driver (ex-message e))
-                            {:driver driver, :sql sql, :params params}
-                            e))))))))
+    (let [conn (jdbc-spec->connection spec)]
+      (locking conn
+        (doseq [[^String sql & params] statements]
+          (try
+            (with-open [^PreparedStatement stmt (.prepareStatement conn sql)]
+              (sql-jdbc.execute/set-parameters! driver stmt params)
+              (let [rows-affected (.executeUpdate stmt)]
+                (log/infof "[%s] Inserted %d rows into starburst table %s" driver rows-affected table-identifier)))
+            (catch Throwable e
+              (throw (ex-info (format "[%s] Error executing SQL: %s" driver (ex-message e))
+                              {:driver driver, :sql sql, :params params}
+                              e)))))))))
 
 (defmethod sql.tx/drop-db-if-exists-sql :starburst [_ _] nil)
 (defmethod sql.tx/create-db-sql         :starburst [_ _] nil)
@@ -143,7 +149,9 @@
     (str/replace sql #", PRIMARY KEY \([^)]+\)|NOT NULL" "")))
 
 (defmethod ddl.i/format-name :starburst [_ table-or-field-name]
-  (u/snake-key table-or-field-name))
+  (if config/is-test?
+    table-or-field-name
+    (u/->snake_case_en table-or-field-name)))
 
 ;; Trino doesn't support FKs, at least not adding them via DDL
 (defmethod sql.tx/add-fk-sql :starburst

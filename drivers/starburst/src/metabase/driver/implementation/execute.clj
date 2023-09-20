@@ -21,6 +21,8 @@
             [metabase.driver.sql.parameters.substitution :as sql.params.substitution]
             [metabase.query-processor.timezone :as qp.timezone]
             [metabase.api.common :as api]
+            [metabase.query-processor.store :as qp.store]
+            [metabase.lib.metadata :as lib.metadata]
             [metabase.util.date-2 :as u.date]
             [metabase.util.i18n :refer [trs]])
   (:import com.mchange.v2.c3p0.C3P0ProxyConnection
@@ -160,6 +162,14 @@
     (.clearSessionUser (.unwrap conn TrinoConnection))
     nil))
 
+; Metabase tests require a specific error when an invalid number of parameters are passed
+(defn handle-execution-error
+  [e]
+  (log/fatalf (.getMessage e))
+  (if (clojure.string/includes? (.getMessage e) "Incorrect number of parameters")
+    (throw (Exception. "It looks like we got more parameters than we can handle, remember that parameters cannot be used in comments or as identifiers."))
+    (throw e)))
+
 (defmethod sql-jdbc.execute/prepared-statement :starburst
   [driver ^Connection conn ^String sql params]
   ;; with Starburst driver, result set holdability must be HOLD_CURSORS_OVER_COMMIT
@@ -177,9 +187,11 @@
       (sql-jdbc.execute/set-parameters! driver stmt params)
       (proxy [java.sql.PreparedStatement] []
         (executeQuery []
-          (let [rs (.executeQuery stmt)]
-            (remove-impersonation conn)
-            rs))
+          (try
+            (let [rs (.executeQuery stmt)]
+              (remove-impersonation conn)
+              rs)
+              (catch Throwable e (handle-execution-error e))))
         (setMaxRows [nb] (.setMaxRows stmt nb))
         (close [] (.close stmt)))
       (catch Throwable e
@@ -200,9 +212,11 @@
         (log/debug e (trs "Error setting statement fetch direction to FETCH_FORWARD"))))
     (proxy [java.sql.Statement] []
       (execute [sql]
-        (let [rs (.execute stmt sql)]
-          (remove-impersonation conn)
-          rs))
+        (try
+          (let [rs (.execute stmt sql)]
+            rs)
+            (catch Throwable e (handle-execution-error e))
+            (finally (remove-impersonation conn))))
       (getResultSet [] (.getResultSet stmt))
       (setMaxRows [nb] (.setMaxRows stmt nb))
       (close [] (.close stmt)))))
@@ -220,7 +234,7 @@
   ;; (which was set via report time zone), it is necessary to use the `from_iso8601_timestamp` function on the string
   ;; representation of the `ZonedDateTime` instance, but converted to the report time zone
   ;_(date-time->substitution (.format (t/offset-date-time (t/local-date-time t) (t/zone-offset 0)) DateTimeFormatter/ISO_OFFSET_DATE_TIME))
-  (let [report-zone       (qp.timezone/report-timezone-id-if-supported :starburst)
+  (let [report-zone       (qp.timezone/report-timezone-id-if-supported :starburst (lib.metadata/database (qp.store/metadata-provider)))
         ^ZonedDateTime ts (if (str/blank? report-zone) t (t/with-zone-same-instant t (t/zone-id report-zone)))]
     ;; the `from_iso8601_timestamp` only accepts timestamps with an offset (not a zone ID), so only format with offset
     (date-time->substitution (.format ts DateTimeFormatter/ISO_OFFSET_DATE_TIME))))
