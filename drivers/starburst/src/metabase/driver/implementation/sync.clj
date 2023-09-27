@@ -24,7 +24,8 @@
             [metabase.driver.sql-jdbc.sync.describe-database :as sql-jdbc.describe-database]
             [metabase.driver.sql-jdbc.execute :as sql-jdbc.execute]
             [metabase.driver.sql.util :as sql.u]
-            [metabase.util.i18n :refer [trs]]))
+            [metabase.util.i18n :refer [trs]])
+  (:import (java.sql Connection)))
 
 (def starburst-type->base-type
   "Function that returns a `base-type` for the given `straburst-type` (can be a keyword or string)."
@@ -125,35 +126,44 @@
   
 (defmethod driver/describe-database :starburst
   [driver {{:keys [catalog schema] :as details} :details :as database}]
-  (with-open [conn (-> (sql-jdbc.conn/db->pooled-connection-spec database)
-                       jdbc/get-connection)]
-    (let [schemas (if schema #{(describe-schema driver conn catalog schema)}
+  (sql-jdbc.execute/do-with-connection-with-options
+    driver
+    database
+    nil
+    (fn [^Connection conn]
+      (let [schemas (if schema #{(describe-schema driver conn catalog schema)}
                       (all-schemas driver conn catalog))]
-      {:tables (reduce set/union schemas)})))
+        {:tables (reduce set/union schemas)}))))
 
 (defmethod driver/describe-table :starburst
   [driver {{:keys [catalog] :as details} :details :as database} {schema :schema, table-name :name}]
-  (with-open [conn (-> (sql-jdbc.conn/db->pooled-connection-spec database)
-                       jdbc/get-connection) 
-              stmt (.createStatement conn)] 
-    (let [sql (describe-table-sql driver catalog schema table-name)
-          rs (sql-jdbc.execute/execute-statement! driver stmt sql)]
-      {:schema schema
-       :name   table-name
-       :fields (into
-                #{}
-                (map-indexed (fn [idx {:keys [column type] :as col}]
-                               {:name column
-                                :database-type type
-                                :base-type         (starburst-type->base-type type)
-                                :database-position idx}))
-                (jdbc/reducible-result-set rs {}))})))
+  (sql-jdbc.execute/do-with-connection-with-options
+    driver
+    database
+    nil
+    (fn [^Connection conn]
+      (with-open [stmt (.createStatement conn)]
+        (let [sql (describe-table-sql driver catalog schema table-name)
+              rs (sql-jdbc.execute/execute-statement! driver stmt sql)]
+          {:schema schema
+           :name   table-name
+           :fields (into
+            #{}
+            (map-indexed (fn [idx {:keys [column type] :as col}]
+                            {:name column
+                            :database-type type
+                            :base-type         (starburst-type->base-type type)
+                            :database-position idx}))
+            (jdbc/reducible-result-set rs {}))})))))
 
 (defmethod driver/db-default-timezone :starburst
   [driver {{:keys [catalog] :as details} :details :as database}]
-  (with-open [conn (-> (sql-jdbc.conn/db->pooled-connection-spec database)
-                       jdbc/get-connection)
-              stmt (.createStatement conn)]
-    (let [rs (sql-jdbc.execute/execute-statement! driver stmt "SELECT current_timezone() as \"time-zone\"")
-          [{:keys [time-zone]}] (jdbc/result-set-seq rs)]
-      time-zone)))
+  (sql-jdbc.execute/do-with-connection-with-options
+    driver
+    database
+    nil
+    (fn [^Connection conn]
+      (with-open [stmt (.createStatement conn)]
+        (let [rs (sql-jdbc.execute/execute-statement! driver stmt "SELECT current_timezone() as \"time-zone\"")
+              [{:keys [time-zone]}] (jdbc/result-set-seq rs)]
+          time-zone)))))

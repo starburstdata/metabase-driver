@@ -17,7 +17,7 @@
                         [metabase.driver.sql-jdbc.execute.legacy-impl :as sql-jdbc.legacy]))
 (driver/register! :starburst, :parent #{::sql-jdbc.legacy/use-legacy-classes-for-read-and-set})
  
-(prefer-method driver/supports? [:starburst :set-timezone] [:sql-jdbc :set-timezone])
+(prefer-method driver/database-supports? [:starburst :set-timezone] [:sql-jdbc :set-timezone])
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                                  Load implemetation files                                      |
