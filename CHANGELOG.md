@@ -2,6 +2,10 @@
 
 ## [4.0.0] - 2023-09-27
 
+-   Dump Metabase version to v1.47.2
+-   Fix timestamp filter issue with version 1.47.x
+-   Add an impersonation option when defining a Starburst database
+
 ## [3.0.1] - 2023-05-25
 
 -   Bump Metabase version to v1.46.4
