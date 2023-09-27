@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [3.0.2] - 2023-09-27
+
 ## [3.0.1] - 2023-05-25
 
 -   Bump Metabase version to v1.46.4
@@ -61,7 +63,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/3.0.0...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/3.0.2...HEAD
+
+[3.0.2]: https://github.com/starburstdata/metabase-driver/compare/3.0.0...3.0.2
 
 [3.0.0]: https://github.com/starburstdata/metabase-driver/compare/2.0.0...3.0.0
 
