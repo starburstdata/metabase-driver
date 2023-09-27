@@ -44,27 +44,30 @@
   (-> (.. rs getStatement getConnection)
       pooled-conn->trino-conn))
 
-(defmethod sql-jdbc.execute/connection-with-timezone :starburst
-  [driver database ^String timezone-id]
-  ;; Trino supports setting the session timezone via a `TrinoConnection` instance method. Under the covers,
-  ;; https://github.com/trinodb/trino/blob/master/client/trino-jdbc/src/main/java/io/trino/jdbc/TrinoConnection.java#L596
-  ;; this is equivalent to the `X-Trino-Time-Zone` header in the HTTP request (i.e. the `:starburst` driver)
-  (let [conn            (.getConnection (sql-jdbc.execute/datasource-with-diagnostic-info! driver database))
-        underlying-conn (pooled-conn->trino-conn conn)]
-    (try
-      (sql-jdbc.execute/set-best-transaction-level! driver conn)
-      (when-not (str/blank? timezone-id)
-        ;; set session time zone if defined
-        (.setTimeZoneId underlying-conn timezone-id))
+(defmethod sql-jdbc.execute/do-with-connection-with-options :starburst
+  [driver db-or-id-or-spec {:keys [session-timezone write?], :as options} f]
+  (sql-jdbc.execute/do-with-resolved-connection
+    driver
+    db-or-id-or-spec
+    options
+    (fn [^java.sql.Connection conn]
       (try
-        (.setReadOnly conn true)
+        (sql-jdbc.execute/set-best-transaction-level! driver conn)
+        (let [underlying-conn (pooled-conn->trino-conn conn)
+              session-timezone (get options :session-timezone)]
+          (when-not (str/blank? (get options :session-timezone))
+            ;; set session time zone if defined
+            (.setTimeZoneId underlying-conn (get options :session-timezone))))
+        (try
+          (.setReadOnly conn true)
+          (catch Throwable e
+            (log/warn e (trs "Error setting Trino connection to read-only"))))
+          ;; as with statement and prepared-statement, cannot set holdability on the connection level
+        conn
         (catch Throwable e
-          (log/warn e (trs "Error setting Trino connection to read-only"))))
-      ;; as with statement and prepared-statement, cannot set holdability on the connection level
-      conn
-      (catch Throwable e
-        (.close conn)
-        (throw e)))))
+          (.close conn)
+          (throw e)))
+        (f conn))))
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                          Reading Columns from Result Set                                       |
