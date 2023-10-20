@@ -14,10 +14,26 @@
 (ns metabase.driver.starburst
   "Starburst driver."
   (:require [metabase.driver :as driver]
-                        [metabase.driver.sql-jdbc.execute.legacy-impl :as sql-jdbc.legacy]))
+            [metabase.query-processor.util :as qp.util]
+            [metabase.public-settings :as public-settings]
+            [metabase.driver.sql-jdbc.execute.legacy-impl :as sql-jdbc.legacy]))
 (driver/register! :starburst, :parent #{::sql-jdbc.legacy/use-legacy-classes-for-read-and-set})
  
 (prefer-method driver/database-supports? [:starburst :set-timezone] [:sql-jdbc :set-timezone])
+
+(defn format-field
+  [name value]
+  (if (nil? value)
+    ""
+    (str " " name ": " value)))
+
+(defmethod qp.util/query->remark :starburst
+  [_ {{:keys [card-id dashboard-id]} :info, :as query}]
+  (str
+    (qp.util/default-query->remark query)
+    (format-field "accountID" (public-settings/site-uuid))
+    (format-field "dashboardID" dashboard-id)
+    (format-field "cardID" card-id)))
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                                  Load implemetation files                                      |
