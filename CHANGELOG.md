@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+- Add a new "Optimized prepared statement" option when defining a database
+- Add further detail in the query comments such as account ID, dashboard ID or card ID when available
+
 ## [4.0.0] - 2023-09-27
 
 -   Dump Metabase version to v1.47.2

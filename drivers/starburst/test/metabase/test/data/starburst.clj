@@ -61,6 +61,7 @@
    :port                               (tx/db-test-env-var :starburst :port "8082")
    :user                               (tx/db-test-env-var-or-throw :starburst :user "metabase")
    :additional-options                 (tx/db-test-env-var :starburst :additional-options nil)
+   :prepared-optimized                 (tx/db-test-env-var :starburst :prepared-optimized (not= (System/getProperty "explicitPrepare" "true") "true"))
    :ssl                                (tx/db-test-env-var :starburst :ssl "false")
    :kerberos                           (tx/db-test-env-var :starburst :kerberos "false")
    :kerberos-principal                 (tx/db-test-env-var :starburst :kerberos-principal nil)

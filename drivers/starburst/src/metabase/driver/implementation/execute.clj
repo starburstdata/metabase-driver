@@ -17,6 +17,7 @@
             [clojure.tools.logging :as log]
             [java-time :as t]
             [metabase.driver.implementation.sync :refer [starburst-type->base-type]]
+            [metabase.driver.implementation.messages :as msg]
             [metabase.driver.sql-jdbc.execute :as sql-jdbc.execute]
             [metabase.driver.sql.parameters.substitution :as sql.params.substitution]
             [metabase.query-processor.timezone :as qp.timezone]
@@ -168,10 +169,75 @@
 ; Metabase tests require a specific error when an invalid number of parameters are passed
 (defn handle-execution-error
   [e]
-  (log/fatalf (.getMessage e))
-  (if (clojure.string/includes? (.getMessage e) "Incorrect number of parameters")
-    (throw (Exception. "It looks like we got more parameters than we can handle, remember that parameters cannot be used in comments or as identifiers."))
-    (throw e)))
+  (let [message (.getMessage e)]
+    (cond
+      (clojure.string/includes? message "Expecting: 'USING'")
+      (throw (Exception. (str message msg/STARBURST_MAYBE_INCOMPATIBLE)))
+      (clojure.string/includes? message "Incorrect number of parameters")
+      (throw (Exception. msg/TOO_MANY_PARAMETERS))
+      :else (throw e))))
+
+; Optimized prepared statement where a proxy is generated and set-parameters! called on that proxy.
+; Metabase is sometimes calling getParametersMetaData() on the prepared statement in order to count
+; the number of parameters and verify they are correct with what is expected
+; This unfortunately defeats the purpose of using EXECUTE IMMEDIATE as it forces the JDBC driver
+; to call an explicit PREPARE. However this call is optional, so the solution is to create a proxy
+; which defines all methods used by Metabase *except* for metadata methods. When Metabase tries
+; to count the number of parameters:
+; - The proxy issues an exception as getParametersMetaData() is not defined
+; - Metabase catches the exception and does not perform the check
+; - An invalid query is sent to Trino, which fails with a "Incorrect number of parameters" message
+; - This message is caught by the driver and replaced with the exact same Metabase message
+; In the end, the exact same message is presented to the user when the number of arguments is
+; incorrect except we now execute the query to display the error message
+(defn proxy-optimized-prepared-statement
+  [driver conn stmt params]
+  (let [ps (proxy [java.sql.PreparedStatement] []
+          (executeQuery []
+            (try
+              (let [rs (.executeQuery stmt)]
+                (remove-impersonation conn)
+                rs)
+                (catch Throwable e (handle-execution-error e))))
+          (setMaxRows [nb] (.setMaxRows stmt nb))
+          (setObject
+            ([index obj] (.setObject stmt index obj))
+            ([index obj type] (.setObject stmt index obj type)))
+          (setTime
+            ([index val] (.setTime stmt index val))
+            ([index val cal] (.setTime stmt index val cal)))
+          (setTimestamp
+            ([index val] (.setTimestamp stmt index val))
+            ([index val cal] (.setTimestamp stmt index val cal)))
+          (setDate
+            ([index val] (.setDate stmt index val))
+            ([index val cal] (.setDate stmt index val cal)))
+          (setArray [index val] (.setArray stmt index val))
+          (setBoolean [index val] (.setBoolean stmt index val))
+          (setByte [index val] (.setByte stmt index val))
+          (setBytes [index val] (.setBytes stmt index val))
+          (setInt [index val] (.setInt stmt index val))
+          (setShort [index val] (.setShort stmt index val))
+          (setLong [index val] (.setLong stmt index val))
+          (setFloat [index val] (.setFloat stmt index val))
+          (setDouble [index val] (.setDouble stmt index val))
+          (close [] (.close stmt)))]
+    (sql-jdbc.execute/set-parameters! driver ps params)
+    ps))
+
+; Default prepared statement where set-parameters! is called before generating the proxy
+(defn proxy-prepared-statement
+  [driver conn stmt params]
+  (sql-jdbc.execute/set-parameters! driver stmt params)
+  (proxy [java.sql.PreparedStatement] []
+    (executeQuery []
+      (try
+        (let [rs (.executeQuery stmt)]
+          (remove-impersonation conn)
+          rs)
+          (catch Throwable e (handle-execution-error e))))
+    (setMaxRows [nb] (.setMaxRows stmt nb))
+    (close [] (.close stmt))))
 
 (defmethod sql-jdbc.execute/prepared-statement :starburst
   [driver ^Connection conn ^String sql params]
@@ -187,16 +253,10 @@
         (.setFetchDirection stmt ResultSet/FETCH_FORWARD)
         (catch Throwable e
           (log/debug e (trs "Error setting prepared statement fetch direction to FETCH_FORWARD"))))
-      (sql-jdbc.execute/set-parameters! driver stmt params)
-      (proxy [java.sql.PreparedStatement] []
-        (executeQuery []
-          (try
-            (let [rs (.executeQuery stmt)]
-              (remove-impersonation conn)
-              rs)
-              (catch Throwable e (handle-execution-error e))))
-        (setMaxRows [nb] (.setMaxRows stmt nb))
-        (close [] (.close stmt)))
+      (if
+        (.useExplicitPrepare (.unwrap conn TrinoConnection))
+        (proxy-prepared-statement driver conn stmt params)
+        (proxy-optimized-prepared-statement driver conn stmt params))
       (catch Throwable e
         (remove-impersonation conn)
         (.close stmt)
