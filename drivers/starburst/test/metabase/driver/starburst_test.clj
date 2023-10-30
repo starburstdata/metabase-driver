@@ -284,6 +284,57 @@
       (is (= (str "impersonate:true")
              (:clientInfo jdbc-spec))))))
 
+(defn prepared-statements-helper
+  [prepared-optimized]
+        (is (= [["2023-11-06T00:00:00Z" 42 "It was created"]]
+          (mt/rows
+          (let [details {
+            :host                         "localhost"
+            :port                         8082
+            :catalog                      "catalog"
+            :user                         "admin"
+            :ssl                          false
+            :prepared-optimized           prepared-optimized}]
+              (t2.with-temp/with-temp [Database db {:engine :starburst, :name "Temp Trino JDBC Schema DB", :details details}]
+              (mt/with-db db
+              (qp/process-query
+                {:database     (mt/id)
+                :type         :native
+                :native       {
+                  :query         "SELECT {{created_at}}, {{nb_created}}, {{detail}}"
+                  :template-tags {:created_at {:name         "created_at"
+                                               :display_name "created_at"
+                                               :type         :date
+                                               :required     true}
+                                  :nb_created {:name         "nb_created"
+                                               :display_name "nb_created"
+                                               :type         :number
+                                               :required     true}
+                                  :detail {:name         "detail"
+                                               :display_name "detail"
+                                               :type         :text
+                                               :required     true}}}
+                :parameters    [{:type   :date
+                                 :name   "created_at"
+                                 :target [:variable [:template-tag "created_at"]]
+                                 :value  "2023-11-06"}
+                                {:type   :number
+                                 :name   "nb_created"
+                                 :target [:variable [:template-tag "nb_created"]]
+                                 :value  "42"}
+                                 {:type   :text
+                                 :name   "detail"
+                                 :target [:variable [:template-tag "detail"]]
+                                 :value  "It was created"}]}))))))))
+
+(deftest prepared-statements
+  (mt/test-driver :starburst
+    (testing "Make sure prepared statements work"
+        ;; If impersonation is set, then the Trino user should be the current Metabase user, i.e. metabase_user@user.com
+        ;; The role is ignored as Metabase users may not have the role defined in the database connection
+        (prepared-statements-helper true)
+        (prepared-statements-helper false))))
+
 (deftest impersonation-query
   (mt/test-driver :starburst
     (testing "Make sure the right credentials are used depending on the impersonation checkbox"

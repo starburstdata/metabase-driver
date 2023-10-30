@@ -14,8 +14,13 @@
 (ns metabase.driver.starburst
   "Starburst driver."
   (:require [metabase.driver :as driver]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.tools.logging :as log]
+            [metabase.util.ssh :as ssh]
+            [metabase.driver.sql-jdbc.connection :as connection]
             [metabase.query-processor.util :as qp.util]
             [metabase.public-settings :as public-settings]
+            [metabase.driver.implementation.messages :as msg]
             [metabase.driver.sql-jdbc.execute.legacy-impl :as sql-jdbc.legacy]))
 (driver/register! :starburst, :parent #{::sql-jdbc.legacy/use-legacy-classes-for-read-and-set})
  
@@ -34,6 +39,22 @@
     (format-field "accountID" (public-settings/site-uuid))
     (format-field "dashboardID" dashboard-id)
     (format-field "cardID" card-id)))
+
+(defn handle-execution-error
+  [e details]
+  (let [message (.getMessage e)
+        execute-immediate (get details :prepared-optimized false)]
+    (cond
+      (and (clojure.string/includes? message "Expecting: 'USING'") execute-immediate)
+      (throw (Exception. msg/STARBURST_INCOMPATIBLE_WITH_OPTIMIZED_PREPARED))
+      :else (throw e))))
+
+(defmethod driver/can-connect? :starburst
+  [driver details]
+  (try
+    (connection/with-connection-spec-for-testing-connection [jdbc-spec [driver details]]
+      (connection/can-connect-with-spec? jdbc-spec))
+    (catch Throwable e (handle-execution-error e details))))
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                                  Load implemetation files                                      |

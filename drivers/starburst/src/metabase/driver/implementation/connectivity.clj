@@ -15,6 +15,7 @@
   "Connectivity implementation for Starburst driver."
   (:require [clojure.set :as set]
             [clojure.string :as str]
+            [clojure.tools.logging :as log]
             [metabase.api.common :as api]
             [metabase.db.spec :as mdb.spec]
             [metabase.driver.sql-jdbc.common :as sql-jdbc.common]
@@ -109,6 +110,9 @@
     (:impersonation details-map)
     (not= (get (deref api/*current-user*) :email) (:user details-map))))
 
+(defn assoc-if [coll key value condition]
+  (if condition (assoc coll key value) coll))
+
 (defmethod sql-jdbc.conn/connection-details->spec :starburst
   [_ details-map]
   (let [props (-> details-map
@@ -121,7 +125,8 @@
                   (update :kerberos-delegation bool->str)
                   (assoc :SSL (:ssl details-map))
                   (assoc :source "Starburst Metabase 4.0.0")
-                  (assoc :clientInfo (if (:impersonation details-map) "impersonate:true" ""))
+                  (assoc-if :clientInfo "impersonate:true" (:impersonation details-map))
+                  (assoc-if :explicitPrepare "false" (:prepared-optimized details-map))
                   (dissoc (if (remove-role? details-map) :roles :test))
 
                 ;; remove any Metabase specific properties that are not recognized by the Trino JDBC driver, which is
@@ -136,6 +141,6 @@
                                  :source :applicationNamePrefix ::accessToken :SSL :SSLVerification :SSLKeyStorePath
                                  :SSLKeyStorePassword :SSLKeyStoreType :SSLTrustStorePath :SSLTrustStorePassword :SSLTrustStoreType :SSLUseSystemTrustStore
                                  :extraCredentials :roles :sessionProperties :externalAuthentication :externalAuthenticationTokenCache :disableCompression 
-                                 :assumeLiteralNamesInMetadataCallsForNonConformingClients]
+                                 :explicitPrepare :assumeLiteralNamesInMetadataCallsForNonConformingClients]
                                 (keys kerb-props->url-param-names))))]
     (jdbc-spec props)))

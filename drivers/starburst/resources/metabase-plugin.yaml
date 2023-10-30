@@ -42,6 +42,12 @@ driver:
       type: boolean
       required: false
       description: Impersonate end user when running queries
+    - name: prepared-optimized
+      display-name: Optimized prepared statements
+      type: boolean
+      required: false
+      default: false
+      description: Requires Starburst Galaxy, Starburst Enterprise (version 420-e or higher), or Trino (version 418 or higher)
     - advanced-options-start
     - merge:
         - additional-options
