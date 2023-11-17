@@ -1,7 +1,9 @@
 ## [Unreleased]
 
-- Add a new "Optimized prepared statement" option when defining a database
-- Add further detail in the query comments such as account ID, dashboard ID or card ID when available
+## [4.1.0] - 2023-11-17
+
+-   Add a new "Optimized prepared statement" option when defining a database
+-   Add further detail in the query comments such as account ID, dashboard ID or card ID when available
 
 ## [4.0.0] - 2023-09-27
 
@@ -70,7 +72,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/4.0.0...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/4.1.0...HEAD
+
+[4.1.0]: https://github.com/starburstdata/metabase-driver/compare/4.0.0...4.1.0
 
 [4.0.0]: https://github.com/starburstdata/metabase-driver/compare/3.0.0...4.0.0
 
