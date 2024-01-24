@@ -20,9 +20,10 @@
             [java-time :as t]
             [metabase.driver :as driver]
             [metabase.driver.sql-jdbc.connection :as sql-jdbc.conn]
-            [metabase.driver.sql-jdbc.sync :as sql-jdbc.sync]
             [metabase.driver.sql-jdbc.sync.describe-database :as sql-jdbc.describe-database]
             [metabase.driver.sql-jdbc.execute :as sql-jdbc.execute]
+            [metabase.driver.sql-jdbc.sync.interface :as sql-jdbc.sync.interface]
+            [metabase.driver.sql-jdbc.sync :as sql-jdbc.sync]
             [metabase.driver.sql.util :as sql.u]
             [metabase.util.i18n :refer [trs]])
   (:import (java.sql Connection)))
@@ -86,15 +87,16 @@
     (log/debugf "database-type->base-type %s -> %s" field-type base-type)
     base-type))
 
-(defn- have-select-privilege?
-  "Checks whether the connected user has permission to select from the given `table-name`, in the given `schema`."
-  [driver conn schema table-name]
+(defmethod sql-jdbc.sync.interface/have-select-privilege? :starburst
+  [driver ^Connection conn table-schema table-name]
   (try
-    (let [sql (sql-jdbc.describe-database/simple-select-probe-query driver schema table-name)]
-        ;; if the query completes without throwing an Exception, we can SELECT from this table
-      (jdbc/reducible-query {:connection conn} sql)
-      true)
-    (catch Throwable _
+    (let [sql (str "SHOW TABLES FROM \"" table-schema "\" LIKE '" table-name "'")]
+      ;; if the query completes without throwing an Exception, we can SELECT from this table
+      (with-open [stmt (.prepareStatement conn sql)
+                  rs (.executeQuery stmt)]
+          (.next rs)))
+    (catch Throwable e
+      (log/fatal "ERROR WITH QUERY " e)
       false)))
 
 (defn- describe-schema
@@ -106,7 +108,7 @@
       (into 
        #{} 
        (comp (filter (fn [{table-name :table}]
-                                (have-select-privilege? driver conn schema table-name)))
+                                (sql-jdbc.sync.interface/have-select-privilege? driver conn schema table-name)))
                       (map (fn [{table-name :table}]
                              {:name        table-name
                               :schema      schema}))) 
