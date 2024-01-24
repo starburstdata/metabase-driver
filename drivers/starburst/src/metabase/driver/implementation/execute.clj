@@ -199,6 +199,12 @@
                 (remove-impersonation conn)
                 rs)
                 (catch Throwable e (handle-execution-error e))))
+          (execute []
+            (try
+              (let [rs (.execute stmt)]
+                (remove-impersonation conn)
+                rs)
+                (catch Throwable e (handle-execution-error e))))
           (setMaxRows [nb] (.setMaxRows stmt nb))
           (setObject
             ([index obj] (.setObject stmt index obj))
@@ -233,6 +239,12 @@
     (executeQuery []
       (try
         (let [rs (.executeQuery stmt)]
+          (remove-impersonation conn)
+          rs)
+          (catch Throwable e (handle-execution-error e))))
+    (execute []
+      (try
+        (let [rs (.execute stmt)]
           (remove-impersonation conn)
           rs)
           (catch Throwable e (handle-execution-error e))))

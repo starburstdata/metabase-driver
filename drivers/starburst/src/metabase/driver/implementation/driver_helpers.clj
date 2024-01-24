@@ -33,7 +33,7 @@
                               :native-parameters               true
                               :expression-aggregations         true
                               :binning                         true
-                              :foreign-keys                    true
+                              :foreign-keys                    false
                               :datetime-diff                   true
                               :convert-timezone                true
                               :now                             true}]
