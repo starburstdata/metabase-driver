@@ -56,6 +56,12 @@
       (connection/can-connect-with-spec? jdbc-spec))
     (catch Throwable e (handle-execution-error e details))))
 
+;;; The Starburst JDBC driver DOES NOT support the `.getImportedKeys` method so just return `nil` here so the
+;;; implementation doesn't try to use it.
+(defmethod driver/describe-table-fks :starburst
+  [_driver _database _table]
+  nil)
+
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                                  Load implemetation files                                      |
 ;;; +----------------------------------------------------------------------------------------------------------------+
