@@ -79,6 +79,8 @@ update_deps_files:
 test: start_trino_if_missing link_to_driver update_deps_files
 	@echo "Testing Starburst driver..."
 	cp driver_test.clj metabase/test/metabase/
+	cp dataset_definition_test.clj metabase/test/metabase/test/data/
+	cp connection_test.clj metabase/test/metabase/driver/sql_jdbc/connection_test.clj
 	cd $(makefile_dir)/metabase/; DRIVERS=starburst MB_STARBURST_TEST_PORT=$(trino_port) clojure -X:dev:drivers:drivers-dev:test
 
 testOptimized: start_trino_if_missing link_to_driver update_deps_files

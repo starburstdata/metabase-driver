@@ -64,9 +64,9 @@ Head to actions and run the `Release` workflow entering the same the same semant
 ### Update Metabase Version
 If needed, `make checkout_latest_metabase_tag` will update Metabase to its latest tagged release. 
 
-*CAUTION*: the Metabase test file `metabase/test/metabase/driver_test.clj` is overridden by a modified version on the root directory (see the `Makefile`). This is because two tests (`can-connect-with-destroy-db-test` and `check-can-connect-before-sync-test`) do not work with the Starburst driver as they're testing what happens when a database is deleted (which cannot happen with Starburst). So instead of adding some useless stuff to `can-connect?` for the sole purpose of satisfying tests, it was found preferable to just remove those two tests.
+*CAUTION*: several Metabase test files (`driver_test.clj`, `dataset_definition_test.clj` and `connection_test.clj`) are overridden by a modified version on the root directory (see the `Makefile`). This is because several tests (`can-connect-with-destroy-db-test`, `check-can-connect-before-sync-test`, `dataset-with-custom-pk-test`, `dataset-with-custom-composite-pk-test` and `test-ssh-tunnel-connection`) are not expected to work for any Presto/Trino driver. They are explicitly disabled for the Presto and Athena drivers but not the Starburst driver, leading to failures (most of these test foreign keys, something Trino doesn't support).
 
-Whenever upgrading the version of Metabase, `./driver_test.clj` should be replaced with `metabase/test/metabase/driver_test.clj` with the two offending tests removed (unless they pass or there is a clean way around them)
+Whenever upgrading the version of Metabase, compare `./driver_test.clj`, `./dataset_definition_test.clj` and `./connection_test.clj` with the latest Metabase versions and check if changes need to be added.
 
 ## References
 * [Encrypting Metabase Database Details](https://www.metabase.com/docs/latest/operations-guide/encrypting-database-details-at-rest.html)

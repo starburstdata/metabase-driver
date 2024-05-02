@@ -245,7 +245,7 @@
 
 (deftest datetime-diff-base-test
   (mt/test-drivers (mt/normal-drivers-with-feature :datetime-diff)
-    (mt/dataset sample-dataset
+    (mt/dataset test-data
       (letfn [(query [x y unit]
                 (->> (mt/run-mbql-query orders
                        {:limit 1

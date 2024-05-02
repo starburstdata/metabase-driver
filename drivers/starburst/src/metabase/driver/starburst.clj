@@ -58,6 +58,7 @@
 
 ;;; The Starburst JDBC driver DOES NOT support the `.getImportedKeys` method so just return `nil` here so the
 ;;; implementation doesn't try to use it.
+#_{:clj-kondo/ignore [:deprecated-var]}
 (defmethod driver/describe-table-fks :starburst
   [_driver _database _table]
   nil)
