@@ -37,6 +37,8 @@
                               :foreign-keys                    true
                               :datetime-diff                   true
                               :convert-timezone                true
+                              :connection/multiple-databases   true
+                              :metadata/key-constraints        false
                               :now                             true}]
   (defmethod driver/database-supports? [:starburst feature] [_ _ _] supported?))
 

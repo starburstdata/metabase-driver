@@ -27,6 +27,7 @@
             [metabase.models.field :refer [Field]]
             [metabase.models.table :as table :refer [Table]]
             [metabase.query-processor :as qp]
+            [metabase.query-processor.compile :as qp.compile]
             [metabase.sync :as sync]
             [metabase.test :as mt]
             [metabase.test.fixtures :as fixtures]
@@ -122,12 +123,9 @@
   (mt/test-driver :starburst
                   (testing "Make sure date params work correctly when report timezones are set (#10487)"
                     (mt/with-temporary-setting-values [report-timezone "Asia/Hong_Kong"]
-        ;; the `read-column-thunk` for `Types/TIMESTAMP` always returns an `OffsetDateTime`, not a `LocalDateTime`, as
-        ;; the original Starburst version of this test expected; therefore, convert the `ZonedDateTime` corresponding to
-        ;; midnight on this date (at the report TZ) to `OffsetDateTime` for comparison's sake
-                      (is (= [[(-> (t/zoned-date-time 2014 8 2 0 0 0 0 (t/zone-id "Asia/Hong_Kong"))
-                                   t/offset-date-time
-                                   (t/with-offset-same-instant (t/zone-offset 0)))
+        ;; the `read-column-thunk` for `Types/TIMESTAMP` used to return an `OffsetDateTime`, but since Metabase 1.50 it
+        ;; returns a LocalDate
+                      (is (= [[(t/local-date 2014 8 2)
                                (t/local-date 2014 8 2)]]
                              (mt/rows
                               (qp/process-query
@@ -149,7 +147,7 @@
                       (is (= (str "SELECT COUNT(*) AS \"count\" "
                                   "FROM \"default\".\"test_data_venues\" "
                                   "WHERE \"default\".\"test_data_venues\".\"name\" = 'wow'")
-                             (:query (qp/compile-and-splice-parameters query))
+                             (:query (qp.compile/compile-and-splice-parameters query))
                              (-> (qp/process-query query) :data :native_form :query)))))))
 
 (deftest connection-tests
@@ -245,7 +243,7 @@
 
 (deftest datetime-diff-base-test
   (mt/test-drivers (mt/normal-drivers-with-feature :datetime-diff)
-    (mt/dataset sample-dataset
+    (mt/dataset test-data
       (letfn [(query [x y unit]
                 (->> (mt/run-mbql-query orders
                        {:limit 1
