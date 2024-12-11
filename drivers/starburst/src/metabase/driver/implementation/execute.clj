@@ -227,7 +227,8 @@
           (setLong [index val] (.setLong stmt index val))
           (setFloat [index val] (.setFloat stmt index val))
           (setDouble [index val] (.setDouble stmt index val))
-          (close [] (.close stmt)))]
+          (close [] (.close stmt))
+          (cancel [] (.cancel stmt)))]
     (sql-jdbc.execute/set-parameters! driver ps params)
     ps))
 
