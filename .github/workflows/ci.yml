@@ -49,6 +49,11 @@ jobs:
           java-version: ${{ matrix.runners.java_version }}
           java-architecture: ${{ matrix.runners.architecture }}
           clojure-version: ${{ env.CLOJURE_VERSION }}
+      - name: Initialize Metabase
+        run: |
+          cd metabase |
+          yarn build-static-viz |
+          cd ..
       - name: Build
         run: |
           make build

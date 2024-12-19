@@ -28,13 +28,21 @@
             [metabase.models.table :as table :refer [Table]]
             [metabase.query-processor :as qp]
             [metabase.query-processor.compile :as qp.compile]
+            [metabase.query-processor-test.timezones-test :as timezones-test]
             [metabase.sync :as sync]
             [metabase.test :as mt]
             [metabase.test.fixtures :as fixtures]
+            [metabase.test.data.interface :as tx]
+            [metabase.test.data.sql-jdbc :as sql-jdbc.tx]
             [toucan2.tools.with-temp :as t2.with-temp]
             [toucan2.core :as t2]))
 
 (use-fixtures :once (fixtures/initialize :db))
+(sql-jdbc.tx/add-test-extensions! :starburst)
+
+(defmethod tx/before-run :starburst
+  [_]
+  (alter-var-root #'timezones-test/broken-drivers conj :starburst))
 
 (deftest describe-database-test
   (mt/test-driver :starburst
@@ -125,8 +133,8 @@
                     (mt/with-temporary-setting-values [report-timezone "Asia/Hong_Kong"]
         ;; the `read-column-thunk` for `Types/TIMESTAMP` used to return an `OffsetDateTime`, but since Metabase 1.50 it
         ;; returns a LocalDate
-                      (is (= [[(t/local-date 2014 8 2)
-                               (t/local-date 2014 8 2)]]
+                      (is (= [[(t/local-date "2014-08-02")
+                               (t/local-date "2014-08-02")]]
                              (mt/rows
                               (qp/process-query
                                {:database     (mt/id)
@@ -147,7 +155,7 @@
                       (is (= (str "SELECT COUNT(*) AS \"count\" "
                                   "FROM \"default\".\"test_data_venues\" "
                                   "WHERE \"default\".\"test_data_venues\".\"name\" = 'wow'")
-                             (:query (qp.compile/compile-and-splice-parameters query))
+                             (:query (qp.compile/compile-with-inline-parameters query))
                              (-> (qp/process-query query) :data :native_form :query)))))))
 
 (deftest connection-tests
