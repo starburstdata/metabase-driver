@@ -19,6 +19,7 @@ build our `.jar` file into the correct dir, run tests, and start the local serve
 * [Clojure](https://clojure.org/guides/install_clojure)
 * [jq](https://stedolan.github.io/jq/download/)
 * [Metabase Prerequisites](https://www.metabase.com/docs/latest/developers-guide/build#install-the-prerequisites)
+* JDK 8 to 21. **JDK 22 will not work**
 
 ##### Quick Start
 Run `make build test` to build and run tests locally. If everything passes, you're good to go!
@@ -64,9 +65,9 @@ Head to actions and run the `Release` workflow entering the same the same semant
 ### Update Metabase Version
 If needed, `make checkout_latest_metabase_tag` will update Metabase to its latest tagged release. 
 
-*CAUTION*: the Metabase test file `metabase/test/metabase/driver_test.clj` is overridden by a modified version on the root directory (see the `Makefile`). This is because two tests (`can-connect-with-destroy-db-test` and `check-can-connect-before-sync-test`) do not work with the Starburst driver as they're testing what happens when a database is deleted (which cannot happen with Starburst). So instead of adding some useless stuff to `can-connect?` for the sole purpose of satisfying tests, it was found preferable to just remove those two tests.
+*CAUTION*: the Metabase test file `./metabase/.clj-kondo/test/hooks/clojure/test_test.clj` is overridden by a modified version on the root directory (see the `Makefile`). This is because the test `check-driver-keywords-test` is not expected to work with the Starburst driver.
 
-Whenever upgrading the version of Metabase, `./driver_test.clj` should be replaced with `metabase/test/metabase/driver_test.clj` with the two offending tests removed (unless they pass or there is a clean way around them)
+Whenever upgrading the version of Metabase, `./test_test.clj` should be replaced with `./metabase/.clj-kondo/test/hooks/clojure/test_test.clj` with the `check-driver-keywords-test` test removed.
 
 ## References
 * [Encrypting Metabase Database Details](https://www.metabase.com/docs/latest/operations-guide/encrypting-database-details-at-rest.html)

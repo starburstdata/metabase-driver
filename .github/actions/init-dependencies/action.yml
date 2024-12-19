@@ -20,7 +20,7 @@ inputs:
   node-version:
     description: "Node version to setup"
     required: false
-    default: "16.x"
+    default: "18.x"
   clojure-version:
     description: "Clojure version to setup"
     required: true

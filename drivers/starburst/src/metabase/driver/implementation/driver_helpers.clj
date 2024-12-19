@@ -34,12 +34,10 @@
                               :native-parameters               true
                               :expression-aggregations         true
                               :binning                         true
-                              :foreign-keys                    true
+                              ::concat-non-string-args          false
                               :datetime-diff                   true
                               :convert-timezone                true
                               :connection/multiple-databases   true
                               :metadata/key-constraints        false
                               :now                             true}]
   (defmethod driver/database-supports? [:starburst feature] [_ _ _] supported?))
-
-(defmethod driver/database-supports? [:starburst :foreign-keys] [_driver _feature _db] (not config/is-test?))

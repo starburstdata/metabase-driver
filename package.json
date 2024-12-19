@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@rspack/core": "^1.1.8",
+    "@rspack/plugin-react-refresh": "^1.0.1"
+  }
+}
