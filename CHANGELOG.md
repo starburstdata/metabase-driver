@@ -1,6 +1,6 @@
 ## [Unreleased]
 
-## [5.0.0] - 2025-01-09
+## [6.0.0] - 2025-01-10
 
 -   Bump Metabase version to v1.52.2
 -   Re-enable the :foreign-keys feature flag so that users can set external relationships in Metabase
@@ -77,7 +77,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/5.0.0...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/6.0.0...HEAD
+
+[6.0.0]: https://github.com/starburstdata/metabase-driver/compare/5.0.0...6.0.0
 
 [5.0.0]: https://github.com/starburstdata/metabase-driver/compare/4.1.0...5.0.0
 
