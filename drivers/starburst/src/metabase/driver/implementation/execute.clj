@@ -250,7 +250,8 @@
           rs)
           (catch Throwable e (handle-execution-error e))))
     (setMaxRows [nb] (.setMaxRows stmt nb))
-    (close [] (.close stmt))))
+    (close [] (.close stmt))
+    (cancel [] (.cancel stmt))))
 
 (defmethod sql-jdbc.execute/prepared-statement :starburst
   [driver ^Connection conn ^String sql params]
@@ -295,7 +296,8 @@
             (finally (remove-impersonation conn))))
       (getResultSet [] (.getResultSet stmt))
       (setMaxRows [nb] (.setMaxRows stmt nb))
-      (close [] (.close stmt)))))
+      (close [] (.close stmt))
+      (cancel [] (.cancel stmt)))))
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                          Prepared Statement Substitutions                                      |
