@@ -1,4 +1,5 @@
 ## [Unreleased]
+-   Fix an issue where long queries get an error before they complete
 
 ## [6.0.0] - 2025-01-10
 
