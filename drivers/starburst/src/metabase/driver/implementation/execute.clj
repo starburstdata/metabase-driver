@@ -18,6 +18,7 @@
             [java-time :as t]
             [metabase.driver.implementation.sync :refer [starburst-type->base-type]]
             [metabase.driver.implementation.messages :as msg]
+            [metabase.driver.sql-jdbc.connection :as sql-jdbc.conn]
             [metabase.driver.sql-jdbc.execute :as sql-jdbc.execute]
             [metabase.driver.sql.parameters.substitution :as sql.params.substitution]
             [metabase.query-processor.timezone :as qp.timezone]
@@ -69,6 +70,14 @@
           (.close conn)
           (throw e)))
         (f conn))))
+
+(defmethod sql-jdbc.conn/data-warehouse-connection-pool-properties :starburst
+  [driver database]
+  ;; In order to avoid Metabase from cancelling long queries, the
+  ;; unreturnedConnectionTimeout property needs to be updated
+  (merge
+   ((get-method sql-jdbc.conn/data-warehouse-connection-pool-properties :sql-jdbc) driver database)
+   {"unreturnedConnectionTimeout" 100000000000}))
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                          Reading Columns from Result Set                                       |
