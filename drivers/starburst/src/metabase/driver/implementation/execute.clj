@@ -236,6 +236,7 @@
           (setLong [index val] (.setLong stmt index val))
           (setFloat [index val] (.setFloat stmt index val))
           (setDouble [index val] (.setDouble stmt index val))
+          (cancel [] (.cancel stmt))
           (close [] (.close stmt)))]
     (sql-jdbc.execute/set-parameters! driver ps params)
     ps))
@@ -258,6 +259,7 @@
           rs)
           (catch Throwable e (handle-execution-error e))))
     (setMaxRows [nb] (.setMaxRows stmt nb))
+    (cancel [] (.cancel stmt))
     (close [] (.close stmt))))
 
 (defmethod sql-jdbc.execute/prepared-statement :starburst
@@ -303,6 +305,7 @@
             (finally (remove-impersonation conn))))
       (getResultSet [] (.getResultSet stmt))
       (setMaxRows [nb] (.setMaxRows stmt nb))
+      (cancel [] (.cancel stmt))
       (close [] (.close stmt)))))
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
