@@ -236,7 +236,8 @@
           (setLong [index val] (.setLong stmt index val))
           (setFloat [index val] (.setFloat stmt index val))
           (setDouble [index val] (.setDouble stmt index val))
-          (close [] (.close stmt)))]
+          (close [] (.close stmt))
+          (cancel [] (.cancel stmt)))]
     (sql-jdbc.execute/set-parameters! driver ps params)
     ps))
 
@@ -258,7 +259,8 @@
           rs)
           (catch Throwable e (handle-execution-error e))))
     (setMaxRows [nb] (.setMaxRows stmt nb))
-    (close [] (.close stmt))))
+    (close [] (.close stmt))
+    (cancel [] (.cancel stmt))))
 
 (defmethod sql-jdbc.execute/prepared-statement :starburst
   [driver ^Connection conn ^String sql params]
@@ -303,7 +305,8 @@
             (finally (remove-impersonation conn))))
       (getResultSet [] (.getResultSet stmt))
       (setMaxRows [nb] (.setMaxRows stmt nb))
-      (close [] (.close stmt)))))
+      (close [] (.close stmt))
+      (cancel [] (.cancel stmt)))))
 
 ;;; +----------------------------------------------------------------------------------------------------------------+
 ;;; |                                          Prepared Statement Substitutions                                      |
