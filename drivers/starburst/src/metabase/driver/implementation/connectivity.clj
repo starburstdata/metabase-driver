@@ -124,7 +124,7 @@
                   (update :kerberos str->bool)
                   (update :kerberos-delegation bool->str)
                   (assoc :SSL (:ssl details-map))
-                  (assoc :source "Starburst Metabase 6.0.0")
+                  (assoc :source "Starburst Metabase 6.1.0")
                   (assoc-if :clientInfo "impersonate:true" (:impersonation details-map))
                   (assoc-if :explicitPrepare "false" (:prepared-optimized details-map))
                   (dissoc (if (remove-role? details-map) :roles :test))
