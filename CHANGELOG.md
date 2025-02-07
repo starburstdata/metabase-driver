@@ -1,5 +1,8 @@
 ## [Unreleased]
--   Fix an issue where long queries get an error before they complete
+
+## [6.1.0] - 2025-02-07
+
+-   Fix an issue where long queries get an error before completion
 -   Add cancel support for statements
 
 ## [6.0.0] - 2025-01-10
@@ -79,7 +82,9 @@
 -   Adds Starburst specific tests
 -   Adds github CI actions for testing and release
 
-[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/6.0.0...HEAD
+[Unreleased]: https://github.com/starburstdata/metabase-driver/compare/6.1.0...HEAD
+
+[6.1.0]: https://github.com/starburstdata/metabase-driver/compare/6.0.0...6.1.0
 
 [6.0.0]: https://github.com/starburstdata/metabase-driver/compare/5.0.0...6.0.0
 
