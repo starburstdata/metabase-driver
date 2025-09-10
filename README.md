@@ -1,4 +1,6 @@
-# Metabase Starburst Driver
+# Metabase Starburst Driver (RETIRED)
+
+### As Metabase now officially supports Starburst, this repo is now retired. It is now recommended to use the official Trino driver supported by Metabase and file any issue on [https://github.com/metabase/metabase](https://github.com/metabase/metabase)
 
 ## Driver Plugin Installation
 The Starburst Driver `.jar` binary can be downloaded from our releases in github. Once it is downloaded, 
