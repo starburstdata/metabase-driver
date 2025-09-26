@@ -12,6 +12,9 @@ driver:
   parent: sql-jdbc
   connection-properties:
     - host
+    - name: kerberos
+      required: false
+      display-name: kerberos
     - merge:
         - port
         - default: 8080
